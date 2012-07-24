@@ -91,21 +91,20 @@ public class ChunkAccess
         return regions.get(loc);
     }
 
-    protected RegionFile fetchRegion(Coordinate2D loc)
+    protected RegionFile fetchRegion(Coordinate2D regionCoordinate)
     {
-        if(!regions.containsKey(loc))
+        if(!regions.containsKey(regionCoordinate))
             return null;
 
         // check for cached region
-        RegionFile cache = regionCache.get(loc);
+        RegionFile cache = regionCache.remove(regionCoordinate);
 
+        // load new region
         if(cache == null)
-        {
-            // load new region
-            cache = new RegionFile(regions.get(loc));
-            regionCache.put(loc, cache);
-        }
-
+            cache = new RegionFile(regions.get(regionCoordinate));
+        
+        regionCache.put(regionCoordinate, cache);
+        
         return cache;
     }
 
@@ -113,10 +112,13 @@ public class ChunkAccess
     {
         // check for cached chunk
         Coordinate2D chunkCoordinate = new Coordinate2D(x, z);
-        Chunk chunk = chunkCache.get(chunkCoordinate);
+        Chunk chunk = chunkCache.remove(chunkCoordinate);
 
         if(chunk != null)
+        {
+            chunkCache.put(chunkCoordinate, chunk);
             return chunk;
+        }
 
         // decompress new chunk
         DataInputStream dis = getDataInputStream(x, z);
@@ -130,7 +132,6 @@ public class ChunkAccess
 
         // cache this copy
         chunkCache.put(chunkCoordinate, chunk);
-
         return chunk;
     }
 
