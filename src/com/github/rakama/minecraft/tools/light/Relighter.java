@@ -1,6 +1,7 @@
 package com.github.rakama.minecraft.tools.light;
 
 import com.github.rakama.minecraft.chunk.Chunk;
+import com.github.rakama.minecraft.tools.light.LightCache.Mode;
 import com.github.rakama.util.CircularBuffer;
 
 /**
@@ -57,13 +58,13 @@ public class Relighter
 
         // compute block lights
         queue.clear();
-        cache.blocklight = true;
+        cache.setMode(Mode.BLOCKLIGHT);
         cache.enqueueBlockLights(queue);
         propagateLights();
 
         // compute sky lights
         queue.clear();
-        cache.blocklight = false;
+        cache.setMode(Mode.SKYLIGHT);
         cache.enqueueSkyLights(queue);
         propagateLights();
     }

@@ -30,8 +30,10 @@ class LightCache
     protected final Section[] sections;
     protected final Chunk[] chunks;
 
-    protected boolean blocklight;
     protected final int yoff, zoff, xmask, ymask, zmask;
+    protected Mode mode;
+
+    protected enum Mode {BLOCKLIGHT, SKYLIGHT};
 
     protected LightCache(int width16, int length16)
     {
@@ -59,6 +61,8 @@ class LightCache
 
         sections = new Section[width16round * length16round * height16round];
         chunks = new Chunk[width16round * length16round];
+        
+        mode = Mode.SKYLIGHT;
     }
 
     protected void setChunk(int x16, int z16, Chunk chunk)
@@ -94,7 +98,7 @@ class LightCache
 
         int eindex = toElementIndex(x & 0xF, y & 0xF, z & 0xF);
 
-        if(blocklight)
+        if(mode == Mode.BLOCKLIGHT)
             sec.blocklight.set(eindex, val);
         else
             sec.skylight.set(eindex, val);
@@ -110,7 +114,7 @@ class LightCache
 
         int eindex = toElementIndex(x & 0xF, y & 0xF, z & 0xF);
 
-        if(blocklight)
+        if(mode == Mode.BLOCKLIGHT)
             return sec.blocklight.get(eindex);
         else
             return sec.skylight.get(eindex);
@@ -157,8 +161,14 @@ class LightCache
         return Block.isOpaque(getBlockId(x, y, z));
     }
 
-    protected void enqueueSkyLights(CircularBuffer queue)
+    /** Affects the behavior of setLight() and getLight() **/    
+    protected void setMode(Mode mode)
     {
+        this.mode = mode;
+    }
+
+    protected void enqueueSkyLights(CircularBuffer queue)
+    {        
         for(int z = 0; z < length; z++)
         {
             for(int x = 0; x < width; x++)
