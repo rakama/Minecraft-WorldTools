@@ -155,7 +155,7 @@ public class WorldTools
         int span = relighter.span;
 
         profiler.setMode(Mode.READ);
-        Chunk[] localChunks = relight_loadChunks(x0, z0, span);
+        Chunk[] localChunks = relight_readChunks(x0, z0, span);
 
         profiler.setMode(Mode.RELIGHT);
         relight_preprocessChunks(localChunks);
@@ -179,13 +179,13 @@ public class WorldTools
         }
     }
 
-    protected Chunk[] relight_loadChunks(int x0, int z0, int span)
+    protected Chunk[] relight_readChunks(int x0, int z0, int span)
     {
         Chunk[] localChunks = new Chunk[span * span];
 
         for(int x = 0; x < span; x++)
             for(int z = 0; z < span; z++)
-                localChunks[x + z * span] = loadChunk(x + x0, z + z0);
+                localChunks[x + z * span] = readChunk(x + x0, z + z0);
 
         return localChunks;
     }
@@ -217,7 +217,7 @@ public class WorldTools
             || chunks[x + (z+1) * span] == null || chunks[x+1 + (z+1) * span] == null;
     }
     
-    public Chunk loadChunk(int x, int z)
+    public Chunk readChunk(int x, int z)
     {
         try
         {
