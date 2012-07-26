@@ -76,7 +76,7 @@ public class SimpleProfiler
         return System.currentTimeMillis() - initTime;
     }
 
-    public int getSize()
+    public int getNumModes()
     {
         return numModes;
     }

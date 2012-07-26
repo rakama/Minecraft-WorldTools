@@ -123,6 +123,9 @@ public class WorldTools
 
     public void relight()
     {
+        if(access == null)
+            throw new IllegalStateException("Map directory has not been set.");
+        
         int step = 1 << Math.min(4, relight_batch_scale);
         Relighter relighter = new Relighter(step + 2);
 
@@ -219,6 +222,9 @@ public class WorldTools
     
     public Chunk readChunk(int x, int z)
     {
+        if(access == null)
+            throw new IllegalStateException("Map directory has not been set.");
+        
         try
         {
             return access.readChunk(x, z);
@@ -232,6 +238,9 @@ public class WorldTools
 
     public boolean writeChunk(Chunk chunk, int x, int z)
     {
+        if(access == null)
+            throw new IllegalStateException("Map directory has not been set.");
+        
         try
         {
             access.writeChunk(x, z, chunk);

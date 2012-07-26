@@ -69,6 +69,11 @@ public class CircularBuffer
         return size;
     }
 
+    public int capacity()
+    {
+        return buffer.length;
+    }
+    
     public boolean isEmpty()
     {
         return start == end;

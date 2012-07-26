@@ -51,6 +51,9 @@ public class ChunkAccess
 
     protected void init(File ... files)
     {
+        if(regionCache != null)
+            closeAll();
+        
         regions = new TreeMap<Coordinate2D, File>();
         regionCache = new LRUCache<Coordinate2D, RegionFile>(max_region_cache_size);
         chunkCache = new LRUCache<Coordinate2D, Chunk>(max_chunk_cache_size);
@@ -172,7 +175,7 @@ public class ChunkAccess
     }
 
     public void closeAll()
-    {
+    {        
         Iterator<RegionFile> iter = regionCache.values().iterator();
 
         while(iter.hasNext())
