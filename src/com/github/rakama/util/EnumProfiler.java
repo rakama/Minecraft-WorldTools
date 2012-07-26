@@ -18,9 +18,12 @@ package com.github.rakama.util;
 
 public class EnumProfiler<E extends Enum<E>> extends SimpleProfiler
 {
+    E defaultMode;
+    
     public EnumProfiler(E defaultMode)
     {
-        super(defaultMode.getDeclaringClass().getEnumConstants().length, defaultMode.ordinal());
+        super(defaultMode.getDeclaringClass().getEnumConstants().length, defaultMode.ordinal());        
+        this.defaultMode = defaultMode;
     }
 
     public void setMode(E mode)
@@ -31,5 +34,10 @@ public class EnumProfiler<E extends Enum<E>> extends SimpleProfiler
     public long getMilliseconds(E mode)
     {
         return super.getMilliseconds(mode.ordinal());
+    }
+    
+    public Enum<E>[] getModes()
+    {
+        return defaultMode.getDeclaringClass().getEnumConstants();
     }
 }

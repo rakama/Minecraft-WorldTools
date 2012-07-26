@@ -110,6 +110,9 @@ public class ChunkAccess
 
     public Chunk readChunk(int x, int z) throws IOException
     {
+        // TODO: change chunk cache to not clear chunks that
+        // are still referenced from somewhere in process
+        
         // check for cached chunk
         Coordinate2D chunkCoordinate = new Coordinate2D(x, z);
         Chunk chunk = chunkCache.remove(chunkCoordinate);

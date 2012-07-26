@@ -22,24 +22,28 @@ public class SimpleProfiler
 {
     private final long[] milliseconds;
     private long initTime, modeTime;
-    private int currentMode, defaultMode;
+    private int numModes, currentMode, defaultMode;
 
-    public SimpleProfiler(int modes)
+    public SimpleProfiler(int numModes)
     {
-        this(modes, 0);
+        this(numModes, 0);
     }
 
-    public SimpleProfiler(int modes, int defaultMode)
+    public SimpleProfiler(int numModes, int defaultMode)
     {
         this.initTime = System.currentTimeMillis();
         this.modeTime = initTime;
-        this.milliseconds = new long[modes];
+        this.numModes = numModes;
+        this.milliseconds = new long[numModes];
         this.currentMode = defaultMode;
         this.defaultMode = defaultMode;
     }
-
+    
     public void setMode(int mode)
     {
+        if(mode < 0 || mode >= numModes)
+            throw new IndexOutOfBoundsException(Integer.toString(mode));
+        
         updateModeTime();
         currentMode = mode;
     }
@@ -58,6 +62,9 @@ public class SimpleProfiler
 
     public long getMilliseconds(int mode)
     {
+        if(mode < 0 || mode >= numModes)
+            throw new IndexOutOfBoundsException(Integer.toString(mode));
+        
         if(mode == currentMode)
             updateModeTime();
 
@@ -67,6 +74,11 @@ public class SimpleProfiler
     public long getMilliseconds()
     {
         return System.currentTimeMillis() - initTime;
+    }
+
+    public int getSize()
+    {
+        return numModes;
     }
 
     public void reset()
