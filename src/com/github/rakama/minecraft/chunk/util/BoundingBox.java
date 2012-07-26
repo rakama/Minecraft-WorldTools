@@ -1,4 +1,4 @@
-package com.github.rakama.minecraft.tools.loc;
+package com.github.rakama.minecraft.chunk.util;
 
 public class BoundingBox
 {

@@ -1,16 +1,15 @@
 package com.github.rakama.minecraft.tools;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Iterator;
 
 import com.github.rakama.minecraft.chunk.Block;
 import com.github.rakama.minecraft.chunk.Chunk;
-import com.github.rakama.minecraft.tools.cache.ChunkAccess;
-import com.github.rakama.minecraft.tools.cache.RegionInfo;
+import com.github.rakama.minecraft.chunk.io.ChunkAccess;
+import com.github.rakama.minecraft.chunk.io.RegionInfo;
+import com.github.rakama.minecraft.chunk.util.Coordinate2D;
 import com.github.rakama.minecraft.tools.light.ChunkRelighter;
-import com.github.rakama.minecraft.tools.loc.Coordinate2D;
 import com.github.rakama.util.EnumProfiler;
 
 /**

@@ -1,4 +1,4 @@
-package com.github.rakama.minecraft.tools.cache;
+package com.github.rakama.minecraft.chunk.io;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 
 import com.github.rakama.minecraft.chunk.Chunk;
-import com.github.rakama.minecraft.tools.loc.Coordinate2D;
+import com.github.rakama.minecraft.chunk.util.Coordinate2D;
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.NbtIo;
 
