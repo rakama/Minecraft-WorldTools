@@ -1,15 +1,16 @@
 package com.github.rakama.minecraft.tools;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Iterator;
 
 import com.github.rakama.minecraft.chunk.Block;
 import com.github.rakama.minecraft.chunk.Chunk;
-import com.github.rakama.minecraft.tools.light.Relighter;
-import com.github.rakama.util.Coordinate2D;
+import com.github.rakama.minecraft.tools.cache.ChunkAccess;
+import com.github.rakama.minecraft.tools.cache.RegionInfo;
+import com.github.rakama.minecraft.tools.light.ChunkRelighter;
+import com.github.rakama.minecraft.tools.loc.Coordinate2D;
 import com.github.rakama.util.EnumProfiler;
 
 /**
@@ -92,33 +93,8 @@ public class WorldTools
     }
 
     public void setMapDirectory(File map_dir) throws IOException
-    {
-        // get parent directory if argument is a file
-        if(map_dir.isFile())
-            map_dir = map_dir.getParentFile();
-        
-        // check for any .mca files in the current directory
-        File[] files = getRegionFiles(map_dir);
-
-        if(files.length == 0)
-        {
-            // check for level.dat, to see if we're in the map directory
-            File level = new File(map_dir.getCanonicalPath() + "/level.dat");
-            if(level.exists())
-                map_dir = new File(map_dir.getCanonicalPath() + "/region");
-
-            // look for .mca files in the region directory
-            files = getRegionFiles(map_dir);
-        }
-        
-        access = new ChunkAccess(files);
-    }
-    
-    protected File[] getRegionFiles(File region_dir)
-    {
-        return region_dir.listFiles(new FilenameFilter(){
-            public boolean accept(File f, String s){
-                return s.endsWith(".mca");}});
+    {        
+        access = ChunkAccess.createInstance(map_dir);
     }
 
     public void relight()
@@ -127,20 +103,20 @@ public class WorldTools
             throw new IllegalStateException("Map directory has not been set.");
         
         int step = 1 << Math.min(4, relight_batch_scale);
-        Relighter relighter = new Relighter(step + 2);
+        ChunkRelighter relighter = new ChunkRelighter(step + 2);
 
-        Iterator<Coordinate2D> regionIterator = access.regionIterator();
+        Iterator<RegionInfo> regionIterator = access.getRegions().iterator();
 
         // relight each region
         while(regionIterator.hasNext())
         {
-            Coordinate2D current = regionIterator.next();
+            RegionInfo current = regionIterator.next();
+            Coordinate2D coord = current.getRegionCoordinate();
+            
+            System.out.println("Re-Lighting " + current.getFile().getAbsolutePath());
 
-            int x0 = current.x << 5;
-            int z0 = current.z << 5;
-
-            File file = access.getFile(current);
-            System.out.println("Re-Lighting " + file.getAbsolutePath());
+            int x0 = coord.x << 5;
+            int z0 = coord.z << 5;
 
             // relight each chunk in batches
             for(int z = z0; z < z0 + 32; z += step)
@@ -153,7 +129,7 @@ public class WorldTools
         System.out.println("Finished!");
     }
 
-    protected void relight(Relighter relighter, int x0, int z0)
+    protected void relight(ChunkRelighter relighter, int x0, int z0)
     {
         int span = relighter.span;
 

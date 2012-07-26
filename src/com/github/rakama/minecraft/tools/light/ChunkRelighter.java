@@ -20,7 +20,7 @@ import com.github.rakama.util.CircularBuffer;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-public class Relighter
+public class ChunkRelighter
 {
     public static final int min_span = 3;
     public static final int max_span = 34;
@@ -30,7 +30,7 @@ public class Relighter
 
     public final int span, width, length, height;
 
-    public Relighter(int span)
+    public ChunkRelighter(int span)
     {
         if(span < min_span || span > max_span)
             throw new IllegalArgumentException("span value out of range");

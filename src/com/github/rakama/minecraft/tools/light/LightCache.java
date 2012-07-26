@@ -262,7 +262,7 @@ class LightCache
 
     private void enqueueBlock(CircularBuffer queue, int x, int y, int z, int light)
     {
-        queue.push(Relighter.pack(x, y, z, (byte) light));
+        queue.push(ChunkRelighter.pack(x, y, z, (byte) light));
     }
 
     private int toChunkIndex(int x, int z)

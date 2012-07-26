@@ -1,4 +1,4 @@
-package com.github.rakama.util;
+package com.github.rakama.minecraft.tools.loc;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -16,41 +16,45 @@ package com.github.rakama.util;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-public final class Coordinate2D implements Comparable<Coordinate2D>
+public final class Coordinate3D implements Comparable<Coordinate3D>
 {
-    public final int x, z;
+    public final int x, y, z;
 
-    public Coordinate2D(int x, int z)
+    public Coordinate3D(int x, int y, int z)
     {
         this.x = x;
+        this.y = y;
         this.z = z;
     }
 
-    public double getDistance(Coordinate2D c)
+    public double getDistance(Coordinate3D c)
     {
         return Math.sqrt(getSquaredDistance(c));
     }
 
-    public double getSquaredDistance(Coordinate2D c)
+    public double getSquaredDistance(Coordinate3D c)
     {
         double dx = x - c.x;
+        double dy = y - c.y;
         double dz = z - c.z;
-        return dx * dx + dz * dz;
+        return dx * dx + dy * dy + dz * dz;
     }
 
-    public double getManhattanDistance(Coordinate2D c)
+    public double getManhattanDistance(Coordinate3D c)
     {
-        return Math.abs(x - c.x) + Math.abs(z - c.z);
+        return Math.abs(x - c.x) + Math.abs(y - c.y) + Math.abs(z - c.z);
     }
 
     public String toString()
     {
-        return "(" + x + ", " + z + ")";
+        return "(" + x + ", " + y + ", " + z + ")";
     }
 
-    public int compareTo(Coordinate2D l)
+    public int compareTo(Coordinate3D l)
     {
-        if(z != l.z)
+        if(y != l.y)
+            return y - l.y;
+        else if(z != l.z)
             return z - l.z;
         else if(x != l.x)
             return x - l.x;
@@ -60,16 +64,16 @@ public final class Coordinate2D implements Comparable<Coordinate2D>
 
     public boolean equals(Object o)
     {
-        return equals((Coordinate2D) o);
+        return equals((Coordinate3D) o);
     }
 
-    public boolean equals(Coordinate2D c)
+    public boolean equals(Coordinate3D c)
     {
-        return c.x == x && c.z == z;
+        return c.x == x && c.y == y && c.z == z;
     }
 
     public int hashCode()
     {
-        return x ^ z;
+        return x ^ y ^ z;
     }
 }
