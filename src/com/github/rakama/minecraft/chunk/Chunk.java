@@ -56,26 +56,73 @@ public class Chunk
         this.x = x;
         this.z = z;
     }
-    
+
     public int getX()
     {
         return x;
     }
-    
+
     public int getZ()
     {
         return z;
     }
+    
+    public void setHeight(int x, int z, int val)
+    {
+        checkBounds(x, z);
+        heightmap[x + (z << 4)] = val;
+    }
 
+    public void setBiome(int x, int z, int val)
+    {
+        checkBounds(x, z);
+        biomes[x + (z << 4)] = (byte)val;
+    }
+    
     public int getHeight(int x, int z)
     {
+        checkBounds(x, z);
         return heightmap[x + (z << 4)];
     }
 
+    public int getBiome(int x, int z)
+    {
+        checkBounds(x, z);
+        return biomes[x + (z << 4)];
+    }
+    
+    public void setBlockID(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        Section sec = getContainingSection(y, true);
+        sec.setBlockID(x, y & 0xF, z, val);
+    }
+
+    public void setMetaData(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        Section sec = getContainingSection(y, true);
+        sec.setMetaData(x, y & 0xF, z, val);
+    }
+
+    public void setBlockLight(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        Section sec = getContainingSection(y, true);
+        sec.setBlockLight(x, y & 0xF, z, val);
+    }
+
+    public void setSkyLight(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        Section sec = getContainingSection(y, true);
+        sec.setSkyLight(x, y & 0xF, z, val);
+    }
+    
     public int getBlockID(int x, int y, int z)
     {
         checkBounds(x, y, z);
-        Section sec = getContainingSection(y);
+        Section sec = getContainingSection(y, false);
 
         if(sec == null)
             return default_blockid;
@@ -86,7 +133,7 @@ public class Chunk
     public int getMetaData(int x, int y, int z)
     {
         checkBounds(x, y, z);
-        Section sec = getContainingSection(y);
+        Section sec = getContainingSection(y, false);
 
         if(sec == null)
             return default_metadata;
@@ -97,7 +144,7 @@ public class Chunk
     public int getBlockLight(int x, int y, int z)
     {
         checkBounds(x, y, z);
-        Section sec = getContainingSection(y);
+        Section sec = getContainingSection(y, false);
 
         if(sec == null)
             return default_blocklight;
@@ -108,7 +155,7 @@ public class Chunk
     public int getSkyLight(int x, int y, int z)
     {
         checkBounds(x, y, z);
-        Section sec = getContainingSection(y);
+        Section sec = getContainingSection(y, false);
 
         if(sec == null)
             return default_skylight;
@@ -121,14 +168,19 @@ public class Chunk
         return sections[y];
     }
 
-    protected Section getContainingSection(int y)
+    protected Section getContainingSection(int y, boolean create)
     {
         int index = y >> 4;
 
         if(index < 0 || index >= num_sections)
             return null;
 
-        return sections[index];
+        Section sec = sections[index];
+        
+        if(create && sec == null)
+            sec = new Section(y >> 4);
+        
+        return sec;
     }
 
     public CompoundTag getTag()
@@ -147,10 +199,16 @@ public class Chunk
         return tag;
     }
 
+    protected void checkBounds(int x, int z)
+    {
+        if(!inBounds(x, 0, z))
+            throw new IndexOutOfBoundsException("(" + x + ", " + z + ")");
+    }
+
     protected void checkBounds(int x, int y, int z)
     {
         if(!inBounds(x, y, z))
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("(" + x + ", " + y + ", " + z + ")");
     }
 
     protected boolean inBounds(int x, int y, int z)
@@ -165,15 +223,6 @@ public class Chunk
                 return false;
 
         return true;
-    }
-    
-    public int countBlocks()
-    {
-        int total = 0;
-        for(Section section : sections)
-            if(section != null)
-                total += section.countBlocks();
-        return total;
     }
 
     public void recomputeHeightmap()

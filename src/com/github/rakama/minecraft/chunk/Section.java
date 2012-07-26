@@ -65,6 +65,30 @@ public class Section
         return y;
     }
 
+    public void setBlockID(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        blockid[toIndex(x, y, z)] = (byte)val;
+    }
+
+    public void setMetaData(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        metadata.set(toIndex(x, y, z), val);
+    }
+
+    public void setBlockLight(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        blocklight.set(toIndex(x, y, z), val);
+    }
+
+    public void setSkyLight(int x, int y, int z, int val)
+    {
+        checkBounds(x, y, z);
+        skylight.set(toIndex(x, y, z), val);
+    }
+    
     public int getBlockID(int x, int y, int z)
     {
         checkBounds(x, y, z);
@@ -92,7 +116,7 @@ public class Section
     protected static void checkBounds(int x, int y, int z)
     {
         if(!inBounds(x, y, z))
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("(" + x + ", " + y + ", " + z + ")");
     }
 
     protected static boolean inBounds(int x, int y, int z)
@@ -112,15 +136,6 @@ public class Section
                 return false;
 
         return true;
-    }
-
-    public int countBlocks()
-    {
-        int total = 0;
-        for(int id : blockid)
-            if(id != 0)
-                total++;
-        return total;
     }
 
     public CompoundTag createTag()
