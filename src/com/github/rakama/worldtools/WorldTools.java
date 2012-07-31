@@ -42,6 +42,14 @@ public class WorldTools
     {
     }
     
+    /**
+     * Creates a WorldTools instance for a Minecraft world, where rootDirectory 
+     * points to the location of the world's "level.dat" file.
+     * 
+     * @param rootDirectory directory location for the "level.dat" file
+     * @return a WorldTools instance for the specified world
+     * @throws IOException
+     */
     public static WorldTools getInstance(File rootDirectory) throws IOException
     {
         WorldTools tools = new WorldTools();
