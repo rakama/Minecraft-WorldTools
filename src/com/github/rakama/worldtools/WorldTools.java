@@ -44,9 +44,9 @@ public class WorldTools
     
     /**
      * Creates a WorldTools instance, where rootDirectory points to the 
-     * location of the Minecraft world's "level.dat" file.
+     * location of a Minecraft world's "level.dat" file.
      * 
-     * @param rootDirectory directory location for the "level.dat" file
+     * @param rootDirectory directory location for a "level.dat" file
      * @return a WorldTools instance for the specified world
      * @throws IOException
      */
@@ -117,6 +117,7 @@ public class WorldTools
     
     public void relightWorld()
     {
+        manager.closeAll();
         WorldRelighter.relightWorld(access, true);
     }
     
