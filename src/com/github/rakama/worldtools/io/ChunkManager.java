@@ -64,14 +64,14 @@ public class ChunkManager
         return getChunk(x, z, true, false);
     }
     
-    public Chunk getChunk(int x, int z, boolean setDirty)
+    public Chunk getChunk(int x, int z, boolean create)
     {
-        TrackedChunk chunk = getChunk(x, z, true, setDirty);
+        TrackedChunk chunk = getChunk(x, z, true, create);
         
         if(chunk == null)
             return null;
         
-        if(setDirty)
+        if(create)
         {
             chunk.setDirtyBlocks(true);
             chunk.setDirtyLights(true);
@@ -266,7 +266,7 @@ public class ChunkManager
         
         invalidateLights();
         Arrays.fill(window, null);        
-        Collection<ChunkReference> values = cache.values();  
+        Collection<ChunkReference> values = cache.values();
         
         while(!values.isEmpty())
         {      
@@ -283,7 +283,7 @@ public class ChunkManager
                 ChunkReference ref = iter.next();
                 TrackedChunk tracker = ref.get();
                 if(tracker != null)
-                    tracker.flushChanges();
+                    tracker.close();
              }
         }
 
