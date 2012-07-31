@@ -43,8 +43,8 @@ public class WorldTools
     }
     
     /**
-     * Creates a WorldTools instance for a Minecraft world, where rootDirectory 
-     * points to the location of the world's "level.dat" file.
+     * Creates a WorldTools instance, where rootDirectory points to the 
+     * location of the Minecraft world's "level.dat" file.
      * 
      * @param rootDirectory directory location for the "level.dat" file
      * @return a WorldTools instance for the specified world
