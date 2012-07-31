@@ -1,6 +1,5 @@
 package com.github.rakama.worldtools.canvas;
 
-import com.github.rakama.worldtools.coord.BoundingBox;
 import com.github.rakama.worldtools.data.Block;
 import com.github.rakama.worldtools.data.Chunk;
 import com.github.rakama.worldtools.io.ChunkManager;

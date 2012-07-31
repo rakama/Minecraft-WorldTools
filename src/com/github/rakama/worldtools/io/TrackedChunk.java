@@ -1,7 +1,11 @@
 package com.github.rakama.worldtools.io;
 
 import com.github.rakama.worldtools.data.Chunk;
-import com.github.rakama.worldtools.io.ChunkManager;
+import com.mojang.nbt.ByteArrayTag;
+import com.mojang.nbt.CompoundTag;
+import com.mojang.nbt.IntArrayTag;
+import com.mojang.nbt.IntTag;
+import com.mojang.nbt.ListTag;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -19,25 +23,19 @@ import com.github.rakama.worldtools.io.ChunkManager;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-class ChunkTracker
+class TrackedChunk extends Chunk
 {
-    private final Chunk chunk;
     private final ChunkManager manager;
     private boolean dirtyBlocks, dirtyLights;
     
-    public ChunkTracker(Chunk chunk, ChunkManager manager)
+    public TrackedChunk(int x, int z, int[] heightmap, byte[] biomes, ChunkManager manager)
     {
-        this.chunk = chunk;
+        super(x, z, heightmap, biomes);
         this.manager = manager;
         this.dirtyBlocks = false;
         this.dirtyLights = false;
     }
     
-    public Chunk getChunk()
-    {
-        return chunk;
-    }
-        
     public boolean hasDirtyBlocks()
     {
         return dirtyBlocks;
@@ -62,8 +60,8 @@ class ChunkTracker
     {        
         if(dirtyBlocks || dirtyLights)
         {
-            manager.relight(chunk);
-            manager.writeChunk(chunk);
+            manager.relight(this);
+            manager.writeChunk(this);
         }
 
         dirtyBlocks = false;
@@ -74,6 +72,24 @@ class ChunkTracker
     protected void finalize() throws Throwable
     {
         flushChanges();
-        manager.unloadCache(chunk);
+        manager.unloadCache(this);
+    }
+    
+    public static TrackedChunk loadChunk(CompoundTag tag, ChunkManager manager)
+    {
+        CompoundTag level = (CompoundTag) tag.get("Level");
+
+        @SuppressWarnings("unchecked")
+        ListTag<CompoundTag> sections = (ListTag<CompoundTag>) level.get("Sections");
+        IntArrayTag heightmap = (IntArrayTag) level.get("HeightMap");
+        ByteArrayTag biome = (ByteArrayTag) level.get("Biomes");
+        IntTag xPos = (IntTag) level.get("xPos");
+        IntTag zPos = (IntTag) level.get("zPos");
+
+        TrackedChunk chunk = new TrackedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
+        chunk.loadSections(sections);
+        chunk.tag = tag;
+
+        return chunk;
     }
 }

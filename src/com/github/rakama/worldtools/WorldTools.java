@@ -3,18 +3,11 @@ package com.github.rakama.worldtools;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Iterator;
 
 import com.github.rakama.worldtools.canvas.BlockCanvas;
-import com.github.rakama.worldtools.coord.Coordinate2D;
-import com.github.rakama.worldtools.data.Chunk;
-import com.github.rakama.worldtools.data.LevelData;
 import com.github.rakama.worldtools.io.ChunkAccess;
 import com.github.rakama.worldtools.io.ChunkManager;
-import com.github.rakama.worldtools.io.RegionInfo;
-import com.github.rakama.worldtools.light.ChunkRelighter;
 import com.github.rakama.worldtools.light.WorldRelighter;
-import com.github.rakama.worldtools.util.EnumProfiler;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>

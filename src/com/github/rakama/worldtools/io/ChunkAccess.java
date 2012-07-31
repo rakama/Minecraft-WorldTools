@@ -132,6 +132,24 @@ public class ChunkAccess
         
         return chunk;
     }
+    
+    protected TrackedChunk readTrackedChunk(int x, int z, ChunkManager manager) throws IOException
+    {
+        if(debug)
+            log("READ_CHUNK " + x + " " + z);
+        
+        // decompress new chunk
+        DataInputStream dis = getDataInputStream(x, z);
+
+        if(dis == null)
+            return null;
+
+        CompoundTag tag = NbtIo.read(dis);
+        TrackedChunk chunk = TrackedChunk.loadChunk(tag, manager);
+        dis.close();
+        
+        return chunk;
+    }
 
     public void writeChunk(Chunk chunk) throws IOException
     {

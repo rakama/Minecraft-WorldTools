@@ -185,6 +185,11 @@ public class Chunk
     {
         return sections[y];
     }
+    
+    public Section[] getSections(int y)
+    {
+        return sections;
+    }
 
     public int[] getHeightmap()
     {
@@ -349,17 +354,20 @@ public class Chunk
         IntTag zPos = (IntTag) level.get("zPos");
 
         Chunk chunk = new Chunk(xPos.data, zPos.data, heightmap.data, biome.data);
+        chunk.loadSections(sections);
+        chunk.tag = tag;
 
+        return chunk;
+    }
+    
+    protected void loadSections(ListTag<CompoundTag> sections)
+    {
         for(int i = 0; i < sections.size(); i++)
         {
             CompoundTag section = sections.get(i);
             Section sec = Section.loadSection(section);
             int y = sec.getY();
-            chunk.sections[y] = sec;
+            this.sections[y] = sec;
         }
-
-        chunk.tag = tag;
-
-        return chunk;
     }
 }

@@ -1,6 +1,5 @@
 package com.github.rakama.worldtools.io;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class ChunkManager
     protected final boolean debug = false;
     
     private final ChunkAccess access;
-    private final ChunkTracker[] window;
+    private final TrackedChunk[] window;
     private final Map<ChunkID, ChunkReference> cache;
     private final ChunkRelighter relighter;
     
@@ -55,40 +54,35 @@ public class ChunkManager
         this.windowScale = windowScale;
         this.windowSize = 1 << windowScale;   
         this.windowMask = bitmask(windowScale);
-        this.window = new ChunkTracker[windowSize * windowSize];
+        this.window = new TrackedChunk[windowSize * windowSize];
         this.cache = Collections.synchronizedMap(new HashMap<ChunkID, ChunkReference>());
         this.relighter = new ChunkRelighter();
     }
     
     public Chunk getChunk(int x, int z)
     {
-        ChunkTracker tracker = getTracker(x, z, true, false);
-        
-        if(tracker == null)
-            return null;
-        
-        return tracker.getChunk();
+        return getChunk(x, z, true, false);
     }
     
     public Chunk getChunk(int x, int z, boolean setDirty)
     {
-        ChunkTracker tracker = getTracker(x, z, true, setDirty);
+        TrackedChunk chunk = getChunk(x, z, true, setDirty);
         
-        if(tracker == null)
+        if(chunk == null)
             return null;
         
         if(setDirty)
         {
-            tracker.setDirtyBlocks(true);
-            tracker.setDirtyLights(true);
+            chunk.setDirtyBlocks(true);
+            chunk.setDirtyLights(true);
         }
         
-        return tracker.getChunk();
+        return chunk;
     }
     
     public void setDirty(int x, int z, boolean dirty)
     {
-        ChunkTracker tracker = getTracker(x, z, true, dirty);
+        TrackedChunk tracker = getChunk(x, z, true, dirty);
         
         if(tracker == null)
             return;
@@ -97,7 +91,7 @@ public class ChunkManager
         tracker.setDirtyLights(dirty);
     }
 
-    protected synchronized ChunkTracker getTracker(int x, int z, boolean moveWindow, boolean create)
+    protected synchronized TrackedChunk getChunk(int x, int z, boolean moveWindow, boolean create)
     {      
         // try window
         
@@ -108,7 +102,7 @@ public class ChunkManager
         if(inWindow(winX, winZ))
         {
             winIndex = winX + (winZ << windowScale);       
-            ChunkTracker tracker = window[winIndex];       
+            TrackedChunk tracker = window[winIndex];       
             if(tracker != null)
                 return tracker;
         }
@@ -132,7 +126,7 @@ public class ChunkManager
         
         if(ref != null)
         {
-            ChunkTracker tracker = ref.get();
+            TrackedChunk tracker = ref.get();
             if(tracker != null)
             {
                 if(winIndex > -1) 
@@ -148,8 +142,7 @@ public class ChunkManager
         
         // load from chunk access
         
-        Chunk chunk = readChunk(x, z);
-        ChunkTracker tracker = new ChunkTracker(chunk, this);
+        TrackedChunk tracker = readChunk(x, z);
         cache.put(id, new ChunkReference(tracker));
         if(winIndex > -1) 
             window[winIndex] = tracker;        
@@ -172,7 +165,7 @@ public class ChunkManager
         {
             for(int z=windowMinZ; z<windowMinZ + windowSize; z++)
             { 
-                ChunkTracker tracker = window[index];
+                TrackedChunk tracker = window[index];
                 
                 if(tracker == null)
                     continue;
@@ -187,16 +180,16 @@ public class ChunkManager
     
     private void invalidateNeighborLights(int x, int z)
     {
-        getTracker(x - 1, z - 1, false, false).setDirtyLights(true);
-        getTracker(x, z - 1, false, false).setDirtyLights(true); 
-        getTracker(x + 1, z - 1, false, false).setDirtyLights(true); 
+        getChunk(x - 1, z - 1, false, false).setDirtyLights(true);
+        getChunk(x, z - 1, false, false).setDirtyLights(true); 
+        getChunk(x + 1, z - 1, false, false).setDirtyLights(true); 
         
-        getTracker(x - 1, z, false, false).setDirtyLights(true);
-        getTracker(x + 1, z, false, false).setDirtyLights(true); 
+        getChunk(x - 1, z, false, false).setDirtyLights(true);
+        getChunk(x + 1, z, false, false).setDirtyLights(true); 
 
-        getTracker(x - 1, z + 1, false, false).setDirtyLights(true);
-        getTracker(x, z + 1, false, false).setDirtyLights(true); 
-        getTracker(x + 1, z + 1, false, false).setDirtyLights(true);
+        getChunk(x - 1, z + 1, false, false).setDirtyLights(true);
+        getChunk(x, z + 1, false, false).setDirtyLights(true); 
+        getChunk(x + 1, z + 1, false, false).setDirtyLights(true);
     }
     
     private final boolean inWindow(int x, int z)
@@ -241,11 +234,8 @@ public class ChunkManager
                 if(index == 4)
                     continue;
                 
-                ChunkTracker tracker = getTracker(x + x0 - 1, z + z0 - 1, true, false);
-                if(tracker == null)
-                    continue;
-                
-                local[index] = tracker.getChunk();
+                TrackedChunk neighbor = getChunk(x + x0 - 1, z + z0 - 1, true, false);
+                local[index] = neighbor;
             }           
         }
 
@@ -291,7 +281,7 @@ public class ChunkManager
             while(iter.hasNext())
             {
                 ChunkReference ref = iter.next();
-                ChunkTracker tracker = ref.get();
+                TrackedChunk tracker = ref.get();
                 if(tracker != null)
                     tracker.flushChanges();
              }
@@ -313,11 +303,11 @@ public class ChunkManager
         unloadCache();
     }
     
-    protected Chunk readChunk(int x, int z)
+    protected TrackedChunk readChunk(int x, int z)
     {
         try
         {
-            return access.readChunk(x, z);
+            return access.readTrackedChunk(x, z, this);
         }
         catch(IOException e)
         {
@@ -354,9 +344,9 @@ final class ChunkID extends Coordinate2D
     }
 }
 
-final class ChunkReference extends SoftReference<ChunkTracker>
+final class ChunkReference extends SoftReference<TrackedChunk>
 {
-    public ChunkReference(ChunkTracker chunk)
+    public ChunkReference(TrackedChunk chunk)
     {
         super(chunk);
     }        
