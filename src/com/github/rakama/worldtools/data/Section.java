@@ -1,5 +1,6 @@
-package com.github.rakama.minecraft.chunk;
+package com.github.rakama.worldtools.data;
 
+import com.github.rakama.worldtools.util.NibbleArray;
 import com.mojang.nbt.ByteArrayTag;
 import com.mojang.nbt.ByteTag;
 import com.mojang.nbt.CompoundTag;
@@ -32,11 +33,11 @@ public class Section
     public final static int default_skylight = 15;
     public final static int default_blocklight = 15;
 
-    public final int y;
-    public final byte[] blockid;
-    public final NibbleArray metadata;
-    public final NibbleArray blocklight;
-    public final NibbleArray skylight;
+    protected final int y;
+    protected final byte[] blockid;
+    protected final NibbleArray metadata;
+    protected final NibbleArray blocklight;
+    protected final NibbleArray skylight;
 
     public Section(int y)
     {
@@ -65,52 +66,138 @@ public class Section
         return y;
     }
 
+    public void setBlock(int index, Block block)
+    {
+        blockid[index] = (byte)block.getID();
+        metadata.set(index, block.getMetadata());
+    }
+    
+    public void setBlock(int x, int y, int z, Block block)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        blockid[index] = (byte)block.getID();
+        metadata.set(index, block.getMetadata());
+    }
+
+    public void setBlockID(int index, int val)
+    {
+        blockid[index] = (byte)val;
+    }
+    
     public void setBlockID(int x, int y, int z, int val)
     {
         checkBounds(x, y, z);
         blockid[toIndex(x, y, z)] = (byte)val;
     }
 
+    public void setMetaData(int index, int val)
+    {
+        metadata.set(index, val);
+    }
+    
     public void setMetaData(int x, int y, int z, int val)
     {
         checkBounds(x, y, z);
         metadata.set(toIndex(x, y, z), val);
     }
 
+    public void setBlockLight(int index, int val)
+    {
+        blocklight.set(index, val);
+    }
+    
     public void setBlockLight(int x, int y, int z, int val)
     {
         checkBounds(x, y, z);
         blocklight.set(toIndex(x, y, z), val);
     }
 
+    public void setSkyLight(int index, int val)
+    {
+        skylight.set(index, val);
+    }
+    
     public void setSkyLight(int x, int y, int z, int val)
     {
         checkBounds(x, y, z);
         skylight.set(toIndex(x, y, z), val);
     }
+
+    public Block getBlock(int index)
+    {
+        return Block.getBlock(0xFF & blockid[index], metadata.get(index));
+    }
+
+    public Block getBlock(int x, int y, int z)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        return Block.getBlock(0xFF & blockid[index], metadata.get(index));
+    }
+
+    public int getBlockID(int index)
+    {
+        return 0xFF & blockid[index];
+    }
     
     public int getBlockID(int x, int y, int z)
     {
         checkBounds(x, y, z);
-        return blockid[toIndex(x, y, z)];
+        return 0xFF & blockid[toIndex(x, y, z)];
     }
 
+    public int getMetaData(int index)
+    {
+        return metadata.get(index);
+    }
+    
     public int getMetaData(int x, int y, int z)
     {
         checkBounds(x, y, z);
         return metadata.get(toIndex(x, y, z));
     }
 
+    public int getBlockLight(int index)
+    {
+        return blocklight.get(index);
+    }
+    
     public int getBlockLight(int x, int y, int z)
     {
         checkBounds(x, y, z);
         return blocklight.get(toIndex(x, y, z));
     }
 
+    public int getSkyLight(int index)
+    {
+        return skylight.get(index);
+    }
+    
     public int getSkyLight(int x, int y, int z)
     {
         checkBounds(x, y, z);
         return skylight.get(toIndex(x, y, z));
+    }
+
+    public byte[] getBlockIDs()
+    {
+        return blockid;
+    }
+
+    public NibbleArray getMetaData()
+    {
+        return metadata;
+    }
+
+    public NibbleArray getBlockLights()
+    {
+        return skylight;
+    }
+
+    public NibbleArray getSkyLights()
+    {
+        return blocklight;
     }
 
     protected static void checkBounds(int x, int y, int z)

@@ -1,9 +1,11 @@
-package com.github.rakama.minecraft.tools.light;
+package com.github.rakama.worldtools.light;
 
-import com.github.rakama.minecraft.chunk.Block;
-import com.github.rakama.minecraft.chunk.Chunk;
-import com.github.rakama.minecraft.chunk.Section;
-import com.github.rakama.util.CircularBuffer;
+import java.util.Arrays;
+
+import com.github.rakama.worldtools.data.Block;
+import com.github.rakama.worldtools.data.Chunk;
+import com.github.rakama.worldtools.data.Section;
+import com.github.rakama.worldtools.util.CircularBuffer;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -65,7 +67,7 @@ class LightCache
         mode = Mode.SKYLIGHT;
     }
 
-    protected void setChunk(int x16, int z16, Chunk chunk)
+    public void setChunk(int x16, int z16, Chunk chunk) // TODO: immutable
     {
         int cindex = toChunkIndex(x16, z16);
         chunks[cindex] = chunk;
@@ -87,8 +89,8 @@ class LightCache
             }
         }
     }
-
-    protected void setLight(int x, int y, int z, byte val)
+    
+    public void setLight(int x, int y, int z, byte val)
     {
         int sindex = toSectionIndex(x >> 4, y >> 4, z >> 4);
         Section sec = sections[sindex];
@@ -99,12 +101,12 @@ class LightCache
         int eindex = toElementIndex(x & 0xF, y & 0xF, z & 0xF);
 
         if(mode == Mode.BLOCKLIGHT)
-            sec.blocklight.set(eindex, val);
+            sec.setBlockLight(eindex, val);
         else
-            sec.skylight.set(eindex, val);
+            sec.setSkyLight(eindex, val);
     }
 
-    protected int getLight(int x, int y, int z)
+    public int getLight(int x, int y, int z)
     {
         int sindex = toSectionIndex(x >> 4, y >> 4, z >> 4);
         Section sec = sections[sindex];
@@ -115,12 +117,12 @@ class LightCache
         int eindex = toElementIndex(x & 0xF, y & 0xF, z & 0xF);
 
         if(mode == Mode.BLOCKLIGHT)
-            return sec.blocklight.get(eindex);
+            return sec.getBlockLight(eindex);
         else
-            return sec.skylight.get(eindex);
+            return sec.getSkyLight(eindex);
     }
 
-    protected int getHeight(int x, int z)
+    public int getHeight(int x, int z)
     {
         int cindex = toChunkIndex(x >> 4, z >> 4);
         Chunk chunk = chunks[cindex];
@@ -134,7 +136,7 @@ class LightCache
         return chunks[cindex].getHeight(x, z);
     }
 
-    protected int getBlockId(int x, int y, int z)
+    public int getBlockID(int x, int y, int z)
     {
         int sindex = toSectionIndex(x >> 4, y >> 4, z >> 4);
         Section sec = sections[sindex];
@@ -143,31 +145,38 @@ class LightCache
             return 0;
 
         int eindex = toElementIndex(x & 0xF, y & 0xF, z & 0xF);
-        return sec.blockid[eindex];
+        return sec.getBlockID(eindex);
     }
 
-    protected int getBlockLuminance(int x, int y, int z)
+    public int getBlockLuminance(int x, int y, int z)
     {
-        return Block.getLuminance(getBlockId(x, y, z));
+        return Block.getLuminance(getBlockID(x, y, z));
     }
 
-    protected int getBlockDiffusion(int x, int y, int z)
+    public int getBlockDiffusion(int x, int y, int z)
     {
-        return Block.getDiffusion(getBlockId(x, y, z));
+        return Block.getLightDiffusion(getBlockID(x, y, z));
     }
     
-    protected boolean isOpaque(int x, int y, int z)
+    public boolean isOpaque(int x, int y, int z)
     {
-        return Block.isOpaque(getBlockId(x, y, z));
+        return Block.isOpaque(getBlockID(x, y, z));
     }
 
     /** Affects the behavior of setLight() and getLight() **/    
-    protected void setMode(Mode mode)
+    public void setMode(Mode mode)
     {
         this.mode = mode;
     }
 
-    protected void enqueueSkyLights(CircularBuffer queue)
+    public void clearSkyLights()
+    {
+        for(Chunk chunk : chunks)
+            if(chunk != null)
+                chunk.clearSkyLights();
+    }
+    
+    public void enqueueSkyLights(CircularBuffer queue)
     {        
         for(int z = 0; z < length; z++)
         {
@@ -221,7 +230,14 @@ class LightCache
         return Chunk.num_sections;
     }
 
-    protected void enqueueBlockLights(CircularBuffer queue)
+    public void clearBlockLights()
+    {
+        for(Chunk chunk : chunks)
+            if(chunk != null)
+                chunk.clearBlockLights();
+    }
+    
+    public void enqueueBlockLights(CircularBuffer queue)
     {
         for(int sindex = 0; sindex < sections.length; sindex++)
         {
@@ -230,13 +246,13 @@ class LightCache
             if(sec == null)
                 continue;
 
-            for(int eindex = 0; eindex < 4096; eindex++)
+            for(int eindex = 0; eindex < Section.volume; eindex++)
             {
-                int light = (byte) Block.getLuminance(sec.blockid[eindex]);
+                int light = Block.getLuminance(sec.getBlockID(eindex));
 
                 if(light > 0)
                 {
-                    sec.blocklight.set(eindex, light);
+                    sec.setBlockLight(eindex, light);
                     enqueueBlock(queue, sindex, eindex, light);
                 }
             }
@@ -262,7 +278,13 @@ class LightCache
 
     private void enqueueBlock(CircularBuffer queue, int x, int y, int z, int light)
     {
-        queue.push(ChunkRelighter.pack(x, y, z, (byte) light));
+        queue.push(ChunkRelighter.pack(x, y, z, (byte)light));
+    }
+    
+    public void clear()
+    {
+        Arrays.fill(chunks, null);
+        Arrays.fill(sections, null);
     }
 
     private int toChunkIndex(int x, int z)

@@ -1,4 +1,4 @@
-package com.github.rakama.util;
+package com.github.rakama.worldtools.util;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;

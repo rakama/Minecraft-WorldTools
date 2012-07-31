@@ -1,4 +1,4 @@
-package com.github.rakama.minecraft.chunk;
+package com.github.rakama.worldtools.data;
 
 import com.mojang.nbt.ByteArrayTag;
 import com.mojang.nbt.CompoundTag;
@@ -56,7 +56,7 @@ public class Chunk
         this.x = x;
         this.z = z;
     }
-
+    
     public int getX()
     {
         return x;
@@ -90,6 +90,13 @@ public class Chunk
         checkBounds(x, z);
         return biomes[x + (z << 4)];
     }
+
+    public void setBlock(int x, int y, int z, Block block)
+    {
+        checkBounds(x, y, z);
+        Section sec = getContainingSection(y, true);
+        sec.setBlock(x, y & 0xF, z, block);
+    }
     
     public void setBlockID(int x, int y, int z, int val)
     {
@@ -117,6 +124,17 @@ public class Chunk
         checkBounds(x, y, z);
         Section sec = getContainingSection(y, true);
         sec.setSkyLight(x, y & 0xF, z, val);
+    }
+
+    public Block getBlock(int x, int y, int z)
+    {
+        checkBounds(x, y, z);
+        Section sec = getContainingSection(y, false);
+
+        if(sec == null)
+            return Block.getBlock(default_blockid);
+
+        return sec.getBlock(x, y & 0xF, z);
     }
     
     public int getBlockID(int x, int y, int z)
@@ -162,28 +180,47 @@ public class Chunk
 
         return sec.getSkyLight(x, y & 0xF, z);
     }
-
+    
     public Section getSection(int y)
     {
         return sections[y];
     }
 
+    public int[] getHeightmap()
+    {
+        return heightmap;
+    }
+
+    public byte[] getBiomes()
+    {
+        return biomes;
+    }
+    
     protected Section getContainingSection(int y, boolean create)
     {
         int index = y >> 4;
 
         if(index < 0 || index >= num_sections)
             return null;
-
+ 
         Section sec = sections[index];
         
         if(create && sec == null)
-            sec = new Section(y >> 4);
+        {
+            createSection(index);
+            sec = sections[index];
+        }
         
         return sec;
     }
+    
+    private synchronized void createSection(int index)
+    {
+        if(sections[index] == null)        
+            sections[index] = new Section(index);
+    }
 
-    public CompoundTag getTag()
+    public synchronized CompoundTag getTag()
     {
         // TODO: generate new tag if tag is null
 
@@ -193,8 +230,9 @@ public class Chunk
         for(Section sec : sections)
             if(sec != null)
                 list.add(sec.createTag());
-
-        tag.put("Sections", list);
+        
+        CompoundTag level = (CompoundTag)tag.get("Level");
+        level.put("Sections", list);
 
         return tag;
     }
@@ -244,22 +282,20 @@ public class Chunk
             if(section == null)
                 continue;
 
-            int blockid = 0;
+            Block block = Block.AIR;
             int y = Section.height;
-            while(Block.isTransparent(blockid) && Block.getDiffusion(blockid) == 0 && --y >= 0)
-                blockid = section.blockid[hindex + (y << 8)];
+            while(!block.isShady() && --y >= 0)
+                block = Block.getBlock(0xFF & section.blockid[hindex + (y << 8)]);
 
-            if(blockid != 0)
+            if(block.isShady())
             {
                 heightmap[hindex] = y + (sec << 4) + 1;
                 break;
             }
-
-            heightmap[hindex] = 0;
         }
     }
 
-    public void trimSections()
+    public synchronized void trimSections()
     {
         boolean fill = false;
 
@@ -279,7 +315,7 @@ public class Chunk
         }
     }
 
-    public void clearLights()
+    public synchronized void clearBlockLights()
     {
         for(Section section : sections)
         {
@@ -287,10 +323,20 @@ public class Chunk
                 continue;
 
             section.blocklight.fill(0);
-            section.skylight.fill(0);
         }
     }
 
+    public synchronized void clearSkyLights()
+    {
+        for(Section section : sections)
+        {
+            if(section == null)
+                continue;
+
+            section.skylight.fill(0);
+        }
+    }
+    
     public static Chunk loadChunk(CompoundTag tag)
     {
         CompoundTag level = (CompoundTag) tag.get("Level");

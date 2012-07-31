@@ -1,4 +1,4 @@
-package com.github.rakama.minecraft.chunk.util;
+package com.github.rakama.worldtools.coord;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -16,7 +16,7 @@ package com.github.rakama.minecraft.chunk.util;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-public final class Coordinate3D implements Comparable<Coordinate3D>
+public class Coordinate3D implements Comparable<Coordinate3D>
 {
     public final int x, y, z;
 

@@ -1,8 +1,8 @@
-package com.github.rakama.minecraft.tools.light;
+package com.github.rakama.worldtools.light;
 
-import com.github.rakama.minecraft.chunk.Chunk;
-import com.github.rakama.minecraft.tools.light.LightCache.Mode;
-import com.github.rakama.util.CircularBuffer;
+import com.github.rakama.worldtools.data.Chunk;
+import com.github.rakama.worldtools.light.LightCache.Mode;
+import com.github.rakama.worldtools.util.CircularBuffer;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -27,9 +27,15 @@ public class ChunkRelighter
 
     protected CircularBuffer queue;
     protected LightCache cache;
+    protected LightWrapper[] wrapper;
 
-    public final int span, width, length, height;
+    protected final int span, width, length, height;
 
+    public ChunkRelighter()
+    {
+        this(3);
+    }
+    
     public ChunkRelighter(int span)
     {
         if(span < min_span || span > max_span)
@@ -42,6 +48,12 @@ public class ChunkRelighter
 
         queue = new CircularBuffer(width * length * height);
         cache = new LightCache(span, span);
+        wrapper = new LightWrapper[span * span];
+
+        for(int z = 0; z < span; z++)
+            for(int x = 0; x < span; x++)
+                if(isImmutable(x, z))
+                    wrapper[x + z * span] = new LightWrapper();
     }
 
     public int getSpan()
@@ -59,14 +71,19 @@ public class ChunkRelighter
         // compute block lights
         queue.clear();
         cache.setMode(Mode.BLOCKLIGHT);
+        cache.clearBlockLights();
         cache.enqueueBlockLights(queue);
         propagateLights();
 
         // compute sky lights
         queue.clear();
         cache.setMode(Mode.SKYLIGHT);
+        cache.clearSkyLights();
         cache.enqueueSkyLights(queue);
         propagateLights();
+        
+        cache.clear();
+        clearWrappers();
     }
 
     protected void fillLightCache(Chunk[] localChunks)
@@ -76,14 +93,24 @@ public class ChunkRelighter
             for(int x = 0; x < span; x++)
             {
                 Chunk chunk = localChunks[x + z * span];
-                cache.setChunk(x, z, chunk);
+                
+                if(chunk == null)
+                {
+                    cache.setChunk(x, z, null);
+                    continue;
+                }
 
-                if(chunk != null)
-                    chunk.clearLights();
-            }
+                chunk.trimSections();
+                chunk.recomputeHeightmap();
+                
+                if(isImmutable(x, z))
+                    cache.setChunk(x, z, getWrapper(x, z, chunk));
+                else
+                    cache.setChunk(x, z, localChunks[x + z * span]);
+            }            
         }
     }
-
+    
     protected void propagateLights()
     {
         int[] pos = new int[3];
@@ -114,21 +141,16 @@ public class ChunkRelighter
         if(x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= length)
             return;
         
-        boolean propagate = true;
         int diffusion = cache.getBlockDiffusion(x, y, z);
         
-        if(diffusion < 0)
-        {
-            propagate = false;
-        }
-        else if(diffusion > 0)
+        if(diffusion > 0)
         {
             light -= diffusion - 1;
             if(light < 1)
                 return;            
         }
             
-        if(setLight(x, y, z, light) && propagate)
+        if(setLight(x, y, z, light))
             queue.push(pack(x, y, z, light));
     }
 
@@ -145,6 +167,29 @@ public class ChunkRelighter
         cache.setLight(x, y, z, newLight);
 
         return true;
+    }
+
+    private LightWrapper getWrapper(int x, int z, Chunk chunk)
+    {
+        if(chunk == null)
+            return null;
+        
+        LightWrapper p = wrapper[x + z * span];
+        p.assign(chunk);
+        return p;
+    }
+    
+    private void clearWrappers()
+    {
+        for(int z = 0; z < span; z++)
+            for(int x = 0; x < span; x++)
+                if(isImmutable(x, z))
+                    wrapper[x + z * span].clear();
+    }
+    
+    private boolean isImmutable(int x, int z)
+    {
+        return z <= 0 || z >= span - 1 || x <= 0 || x >= span - 1;
     }
 
     protected static int pack(int x, int y, int z, byte light)

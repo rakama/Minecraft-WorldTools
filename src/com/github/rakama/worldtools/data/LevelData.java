@@ -1,4 +1,6 @@
-package com.github.rakama.util;
+package com.github.rakama.worldtools.data;
+
+import java.io.File;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -16,28 +18,7 @@ package com.github.rakama.util;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-public class EnumProfiler<E extends Enum<E>> extends SimpleProfiler
+public class LevelData
 {
-    E defaultMode;
-    
-    public EnumProfiler(E defaultMode)
-    {
-        super(defaultMode.getDeclaringClass().getEnumConstants().length, defaultMode.ordinal());        
-        this.defaultMode = defaultMode;
-    }
-
-    public void setMode(E mode)
-    {
-        super.setMode(mode.ordinal());
-    }
-
-    public long getMilliseconds(E mode)
-    {
-        return super.getMilliseconds(mode.ordinal());
-    }
-    
-    public Enum<E>[] getModes()
-    {
-        return defaultMode.getDeclaringClass().getEnumConstants();
-    }
+    protected File file;
 }

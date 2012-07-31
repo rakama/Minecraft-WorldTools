@@ -1,4 +1,4 @@
-package com.github.rakama.minecraft.chunk;
+package com.github.rakama.worldtools.util;
 
 import java.util.Arrays;
 

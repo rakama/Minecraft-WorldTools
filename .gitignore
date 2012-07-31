@@ -167,6 +167,6 @@ pip-log.txt
 ## Custom
 #############
 
+doc/
 junk/
-src/net/minecraft/
-src/com/mojang/
+src/test/

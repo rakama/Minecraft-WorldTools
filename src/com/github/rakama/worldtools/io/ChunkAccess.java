@@ -1,4 +1,4 @@
-package com.github.rakama.minecraft.chunk.io;
+package com.github.rakama.worldtools.io;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -7,15 +7,12 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.minecraft.world.level.chunk.storage.RegionFile;
 
-import com.github.rakama.minecraft.chunk.Chunk;
-import com.github.rakama.minecraft.chunk.util.Coordinate2D;
+import com.github.rakama.worldtools.data.Chunk;
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.NbtIo;
 
@@ -37,57 +34,49 @@ import com.mojang.nbt.NbtIo;
 
 public class ChunkAccess
 {
-    public static int max_region_cache_size = 6;
-    public static int max_chunk_cache_size = 34 * 34;
-
-    protected int regionCacheSize, chunkCacheSize;
-
+    protected final boolean debug = false;
+    
     private File regionDirectory;
-    private RegionManager regions;
-    private ChunkCache cache;
+    private RegionManager regionManager;
 
-    protected ChunkAccess(int regionCacheSize, int chunkCacheSize)
+    protected ChunkAccess()
     {
-        this.regionCacheSize = regionCacheSize;
-        this.chunkCacheSize = chunkCacheSize;
-        
-        regions = new RegionManager(regionCacheSize);
-        cache = new ChunkCache(chunkCacheSize);
+        regionManager = new RegionManager();
     }
 
-    public static ChunkAccess createInstance(File regionDirectory) throws IOException
-    {        
-        ChunkAccess access = new ChunkAccess(max_region_cache_size, max_chunk_cache_size);
-        access.init(regionDirectory);
+    public static ChunkAccess createInstance(File directory) throws IOException
+    {    
+        ChunkAccess access = new ChunkAccess();
+        access.init(directory);
         return access;
     }
     
-    protected void init(File regionDirectory) throws IOException
+    protected void init(File directory) throws IOException
     {
-        if(regions != null)
-            closeAll();
+        if(regionDirectory != null)
+            throw new IllegalStateException("Region directory already initialized!");
 
-        if(!regionDirectory.exists())
-            throw new FileNotFoundException(regionDirectory.getCanonicalPath());
+        if(!directory.exists())
+            throw new FileNotFoundException(directory.getCanonicalPath());
         
         // get parent directory if argument is a file
-        if(regionDirectory.isFile())
-           regionDirectory = regionDirectory.getParentFile();
+        if(directory.isFile())
+           directory = directory.getParentFile();
 
         // check for level.dat, to see if we're in the map directory
-        File level = new File(regionDirectory.getCanonicalPath() + "/level.dat");
+        File level = new File(directory.getCanonicalPath() + "/level.dat");
         if(level.exists())
         {
             // try switching to the /region directory
-            File newDirectory = new File(regionDirectory.getCanonicalPath() + "/region");
+            File newDirectory = new File(directory.getCanonicalPath() + "/region");
             if(newDirectory.exists())
-                regionDirectory = newDirectory;
+                directory = newDirectory;
         }
 
-        this.regionDirectory = regionDirectory;
+        this.regionDirectory = directory;
         
         // check for any .mca files in the current directory
-        File[] files = getRegionFiles(regionDirectory);
+        File[] files = getRegionFiles(directory);
 
         for(File file : files)
             addFile(file);
@@ -114,7 +103,7 @@ public class ChunkAccess
             {
                 int x = Integer.parseInt(matcher.group(1));
                 int z = Integer.parseInt(matcher.group(2));
-                regions.addFile(file, x, z);
+                regionManager.addFile(file, x, z);
                 return true;
             }
         }
@@ -128,32 +117,28 @@ public class ChunkAccess
     
     public Chunk readChunk(int x, int z) throws IOException
     {
-        // check for cached chunk
-        Coordinate2D chunkCoordinate = new Coordinate2D(x, z);
-        Chunk chunk = cache.remove(chunkCoordinate);
+        if(debug)
+            log("READ_CHUNK " + x + " " + z);
+        
+        // decompress new chunk
+        DataInputStream dis = getDataInputStream(x, z);
 
-        if(chunk == null)
-        {
-            // decompress new chunk
-            DataInputStream dis = getDataInputStream(x, z);
+        if(dis == null)
+            return null;
 
-            if(dis == null)
-                return null;
-
-            CompoundTag tag = NbtIo.read(dis);
-            chunk = Chunk.loadChunk(tag);
-            dis.close();
-        }
-
-        // cache this copy
-        cache.put(chunkCoordinate, chunk);
-
+        CompoundTag tag = NbtIo.read(dis);
+        Chunk chunk = Chunk.loadChunk(tag);
+        dis.close();
+        
         return chunk;
     }
 
-    public void writeChunk(int x, int z, Chunk chunk) throws IOException
+    public void writeChunk(Chunk chunk) throws IOException
     {
-        DataOutputStream dos = getDataOutputStream(x, z);
+        if(debug)
+            log("WRITE_CHUNK " + chunk.getX() + " " + chunk.getZ());
+        
+        DataOutputStream dos = getDataOutputStream(chunk.getX(), chunk.getZ());
 
         if(dos == null)
             throw new IOException();
@@ -164,8 +149,7 @@ public class ChunkAccess
 
     protected DataInputStream getDataInputStream(int x, int z) throws IOException
     {
-        Coordinate2D regionCoordinate = new Coordinate2D(x >> 5, z >> 5);
-        RegionFile region = regions.getRegionFile(regionCoordinate);
+        RegionFile region = regionManager.getRegionFile(x >> 5, z >> 5);
 
         if(region == null)
             return null;
@@ -175,49 +159,42 @@ public class ChunkAccess
 
     protected DataOutputStream getDataOutputStream(int x, int z) throws IOException
     {
-        Coordinate2D regionCoordinate = new Coordinate2D(x >> 5, z >> 5);
-        RegionFile region = regions.getRegionFile(regionCoordinate);
+        RegionFile region = regionManager.getRegionFile(x >> 5, z >> 5);
 
         if(region == null)
             throw new IOException();
 
         return region.getChunkDataOutputStream(x & 0x1F, z & 0x1F);
     }
-    
-    public File getRegionDirectory()
-    {
-        return regionDirectory;
-    }        
 
     public Collection<RegionInfo> getRegions()
     {
-        return regions.getRegions();
+        return regionManager.getRegions();
     }
 
+    public File getRegionDirectory()
+    {
+        return regionDirectory;
+    }
+    
+    public RegionManager getRegionManager()
+    {
+        return regionManager;
+    }
+    
     public void closeAll()
     {
-        regions.closeAll();
+        regionManager.closeAll();
     }
 
-    public void finalize()
+    @Override
+    protected void finalize()
     {
         closeAll();
     }
 
-    @SuppressWarnings("serial")
-    class ChunkCache extends LinkedHashMap<Coordinate2D, Chunk>
+    protected final void log(String str)
     {
-        int capacity;
-
-        public ChunkCache(int capacity)
-        {
-            this.capacity = capacity;
-        }
-
-        @Override
-        protected boolean removeEldestEntry(Entry<Coordinate2D, Chunk> eldest)
-        {
-            return size() > capacity;
-        }
+        System.out.println(str);
     }
 }

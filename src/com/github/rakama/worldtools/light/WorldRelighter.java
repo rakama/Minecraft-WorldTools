@@ -1,16 +1,13 @@
-package com.github.rakama.minecraft.tools;
+package com.github.rakama.worldtools.light;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.github.rakama.minecraft.chunk.Block;
-import com.github.rakama.minecraft.chunk.Chunk;
-import com.github.rakama.minecraft.chunk.io.ChunkAccess;
-import com.github.rakama.minecraft.chunk.io.RegionInfo;
-import com.github.rakama.minecraft.chunk.util.Coordinate2D;
-import com.github.rakama.minecraft.tools.light.ChunkRelighter;
-import com.github.rakama.util.EnumProfiler;
+import com.github.rakama.worldtools.coord.Coordinate2D;
+import com.github.rakama.worldtools.data.Chunk;
+import com.github.rakama.worldtools.io.ChunkAccess;
+import com.github.rakama.worldtools.io.RegionInfo;
+import com.github.rakama.worldtools.util.EnumProfiler;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -28,7 +25,7 @@ import com.github.rakama.util.EnumProfiler;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-public class WorldTools
+public class WorldRelighter
 {
     /** skip relighting boundary chunks to avoid creating lighting artifacts **/
     protected static boolean relight_skip_boundaries = true;
@@ -38,71 +35,30 @@ public class WorldTools
     
     protected EnumProfiler<Mode> profiler;
     protected ChunkAccess access;
+    protected boolean verbose;
 
-    enum Mode {DEFAULT, READ, WRITE, RELIGHT};
+    protected enum Mode {DEFAULT, READ, WRITE, RELIGHT};
 
-    public static void main(String[] args)
+    protected WorldRelighter(ChunkAccess access, boolean verbose)
     {
-        try
-        {
-            Block.initializeMaterials();
-        }
-        catch(Exception e)
-        {
-            System.err.println("WorldTools encountered an error while initializing!");
-            e.printStackTrace();
-            System.exit(0);
-        }
-
-        System.out.println("WorldTools v0.1 <ramsesakama@gmail.com>");
-
-        if(args.length < 1)
-        {
-            System.err.println("Couldn't load map directory: (none specified)");
-            System.exit(0);
-        }
-        
-        WorldTools tools = new WorldTools();
-
-        try
-        {
-            tools.setMapDirectory(args[0]);
-        }
-        catch(Exception e)
-        {
-            System.err.println("Couldn't load map directory: " + args[0]);
-            e.printStackTrace();
-            System.exit(0);
-        }
-        
-        tools.relight();        
-        tools.printRunningTime();
-
-        System.exit(0);
+        this.profiler = new EnumProfiler<Mode>(Mode.DEFAULT);
+        this.access = access;
+        this.verbose = verbose;
     }
 
-    public WorldTools()
+    public static void relightWorld(ChunkAccess access, boolean verbose)
     {
-        profiler = new EnumProfiler<Mode>(Mode.DEFAULT);
+        WorldRelighter relighter = new WorldRelighter(access, verbose);
+        relighter.relightWorld();
     }
     
-    public void setMapDirectory(String map_dir) throws IOException
+    protected void relightWorld()
     {
-        setMapDirectory(new File(map_dir));
-    }
-
-    public void setMapDirectory(File map_dir) throws IOException
-    {        
-        access = ChunkAccess.createInstance(map_dir);
-    }
-
-    public void relight()
-    {
-        if(access == null)
-            throw new IllegalStateException("Map directory has not been set.");
+        profiler.reset();
         
         int step = 1 << Math.min(4, relight_batch_scale);
-        ChunkRelighter relighter = new ChunkRelighter(step + 2);
+        int span = step + 2;
+        ChunkRelighter relighter = new ChunkRelighter(span);
 
         Iterator<RegionInfo> regionIterator = access.getRegions().iterator();
 
@@ -112,7 +68,7 @@ public class WorldTools
             RegionInfo current = regionIterator.next();
             Coordinate2D coord = current.getRegionCoordinate();
             
-            System.out.println("Re-Lighting " + current.getFile().getAbsolutePath());
+            log("Re-Lighting " + current.getFile().getAbsolutePath());
 
             int x0 = coord.x << 5;
             int z0 = coord.z << 5;
@@ -120,18 +76,17 @@ public class WorldTools
             // relight each chunk in batches
             for(int z = z0; z < z0 + 32; z += step)
                 for(int x = x0; x < x0 + 32; x += step)
-                    relight(relighter, x - 1, z - 1);
+                    relight_batch(relighter, x - 1, z - 1, span);
         }
 
         access.closeAll();
         
-        System.out.println("Finished!");
+        log("Finished!");
+        printRunningTime();
     }
 
-    protected void relight(ChunkRelighter relighter, int x0, int z0)
+    protected void relight_batch(ChunkRelighter relighter, int x0, int z0, int span)
     {
-        int span = relighter.span;
-
         profiler.setMode(Mode.READ);
         Chunk[] localChunks = relight_readChunks(x0, z0, span);
 
@@ -195,11 +150,8 @@ public class WorldTools
             || chunks[x + (z+1) * span] == null || chunks[x+1 + (z+1) * span] == null;
     }
     
-    public Chunk readChunk(int x, int z)
+    protected Chunk readChunk(int x, int z)
     {
-        if(access == null)
-            throw new IllegalStateException("Map directory has not been set.");
-        
         try
         {
             return access.readChunk(x, z);
@@ -211,14 +163,11 @@ public class WorldTools
         }
     }
 
-    public boolean writeChunk(Chunk chunk, int x, int z)
+    protected boolean writeChunk(Chunk chunk, int x, int z)
     {
-        if(access == null)
-            throw new IllegalStateException("Map directory has not been set.");
-        
         try
         {
-            access.writeChunk(x, z, chunk);
+            access.writeChunk(chunk);
             return true;
         }
         catch(IOException e)
@@ -228,13 +177,22 @@ public class WorldTools
         }
     }
 
-    public void printRunningTime()
+    protected void printRunningTime()
     {
-        System.out.print("Time elapsed: " + profiler.getMilliseconds() + "ms ");
-        System.out.print("(read " + profiler.getMilliseconds(Mode.READ) + "ms, ");
-        System.out.print("write " + profiler.getMilliseconds(Mode.WRITE) + "ms, ");
-        System.out.print("relight " + profiler.getMilliseconds(Mode.RELIGHT) + "ms, ");
-        System.out.print("other " + profiler.getMilliseconds(Mode.DEFAULT) + "ms)");
-        System.out.println();
+        StringBuilder str = new StringBuilder();
+        
+        str.append("Time elapsed: " + profiler.getMilliseconds() + "ms ");
+        str.append("(read " + profiler.getMilliseconds(Mode.READ) + "ms, ");
+        str.append("write " + profiler.getMilliseconds(Mode.WRITE) + "ms, ");
+        str.append("relight " + profiler.getMilliseconds(Mode.RELIGHT) + "ms, ");
+        str.append("other " + profiler.getMilliseconds(Mode.DEFAULT) + "ms)");
+        
+        log(str.toString());
+    }
+    
+    protected void log(String str)
+    {
+        if(verbose)
+            System.out.println(str);
     }
 }
