@@ -76,21 +76,11 @@ public class ChunkManager
         
         // TODO: don't set to dirty unless it's actually creating a chunk
         if(create)
-            chunk.setDirtyBlocks(true);
+            chunk.invalidateBlocks();
         
         return chunk;
     }
     
-    protected void setDirty(int x, int z, boolean dirty)
-    {
-        TrackedChunk chunk = getChunk(x, z, true, dirty);
-        
-        if(chunk == null)
-            return;
-
-        chunk.setDirty(dirty);
-    }
-
     protected synchronized TrackedChunk getChunk(int x, int z, boolean moveWindow, boolean create)
     {      
         // try window
@@ -160,34 +150,26 @@ public class ChunkManager
     
     private void invalidateLights()
     {
-        int index = 0;        
-        for(int x=windowMinX; x<windowMinX + windowSize; x++)
-        {
-            for(int z=windowMinZ; z<windowMinZ + windowSize; z++)
-            { 
-                TrackedChunk chunk = window[index++];
-                
-                if(chunk == null)
-                    continue;
-
-                if(chunk.hasDirtyBlocks())
-                    invalidateNeighborLights(x, z);
-            }
-        }
+        for(TrackedChunk chunk : window)
+            if(chunk != null && chunk.needsNeighborNotify())
+                notifyNeighbors(chunk);
     }
     
-    private void invalidateNeighborLights(int x, int z)
+    private void notifyNeighbors(TrackedChunk chunk)
     {        
-        getChunk(x - 1, z - 1, false, false).setDirty(true);
-        getChunk(x, z - 1, false, false).setDirty(true); 
-        getChunk(x + 1, z - 1, false, false).setDirty(true); 
+        int x = chunk.getX();
+        int z = chunk.getZ();
         
-        getChunk(x - 1, z, false, false).setDirty(true);
-        getChunk(x + 1, z, false, false).setDirty(true); 
-
-        getChunk(x - 1, z + 1, false, false).setDirty(true);
-        getChunk(x, z + 1, false, false).setDirty(true); 
-        getChunk(x + 1, z + 1, false, false).setDirty(true);
+        getChunk(x - 1, z - 1, false, false).invalidateLights();
+        getChunk(x, z - 1, false, false).invalidateLights();
+        getChunk(x + 1, z - 1, false, false).invalidateLights();        
+        getChunk(x - 1, z, false, false).invalidateLights();
+        getChunk(x + 1, z, false, false).invalidateLights();
+        getChunk(x - 1, z + 1, false, false).invalidateLights();
+        getChunk(x, z + 1, false, false).invalidateLights();
+        getChunk(x + 1, z + 1, false, false).invalidateLights();
+        
+        chunk.validateNeighborNotify();
     }
     
     private final boolean inWindow(int x, int z)
@@ -237,15 +219,25 @@ public class ChunkManager
             log("FLUSH_CHANGES " + chunk.getX() + " " + chunk.getZ());
     
         boolean modified = false;
+
+        if(chunk.needsNeighborNotify())
+        {
+            notifyNeighbors(chunk);
+            modified = true;
+        }
         
-        if(chunk.isDirty())
+        if(chunk.needsRelight())
         {
             relightChunk(chunk);
+            modified = true;
+        }
+        
+        if(chunk.needsWrite())
+        {
             writeChunk(chunk);
             modified = true;
         }
 
-        chunk.setDirty(false);
         return modified;
     }
     
@@ -263,7 +255,7 @@ public class ChunkManager
         }
     }
     
-    protected synchronized void relightChunk(Chunk chunk)
+    protected synchronized void relightChunk(TrackedChunk chunk)
     {
         int x0 = chunk.getX();
         int z0 = chunk.getZ();
@@ -286,6 +278,7 @@ public class ChunkManager
         }
 
         relighter.lightChunks(local);
+        chunk.validateLights();
     }
 
     protected synchronized void unloadAll()
@@ -344,11 +337,12 @@ public class ChunkManager
         }
     }
 
-    protected boolean writeChunk(Chunk chunk)
+    protected boolean writeChunk(TrackedChunk chunk)
     {
         try
         {
             access.writeChunk(chunk);
+            chunk.validateFile();
             return true;
         }
         catch(IOException e)

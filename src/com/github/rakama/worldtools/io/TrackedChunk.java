@@ -27,87 +27,119 @@ import com.mojang.nbt.ListTag;
 class TrackedChunk extends Chunk
 {
     private ChunkManager manager;
-    private boolean dirtyBlocks, dirty;
+    private boolean needsWrite, needsRelight, needsNeighborNotify;
     
     public TrackedChunk(int x, int z, int[] heightmap, byte[] biomes, ChunkManager manager)
     {
         super(x, z, heightmap, biomes);
         this.manager = manager;
-        this.dirtyBlocks = false;
-        this.dirty = false;
-    }
-    
-    public boolean hasDirtyBlocks()
-    {
-        return dirtyBlocks;
+        this.needsWrite = false;
+        this.needsRelight = false;
+        this.needsNeighborNotify = false;
     }
 
     public boolean isDirty()
     {
-        return dirty;
+        return needsNeighborNotify || needsRelight || needsWrite;
     }
     
-    public void setDirtyBlocks(boolean dirty)
+    public boolean needsNeighborNotify()
     {
-        this.dirtyBlocks = dirty;
-        this.dirty |= dirty;
+        return needsNeighborNotify;
+    }
+    
+    public boolean needsRelight()
+    {
+        return needsRelight;
     }
 
-    public void setDirty(boolean dirty)
+    public boolean needsWrite()
     {
-        this.dirty = dirty;
-        this.dirtyBlocks &= dirty;
+        return needsWrite;
+    }
+
+    public void validateNeighborNotify()
+    {
+        this.needsNeighborNotify = false;
+    }
+
+    public void validateLights()
+    {
+        this.needsRelight = false;
+    }
+    
+    public void validateFile()
+    {
+        this.needsWrite = false;
+    }
+    
+    public void invalidateBlocks()
+    {
+        this.needsWrite = true;
+        this.needsRelight = true;
+        this.needsNeighborNotify = true;
+    }
+
+    public void invalidateLights()
+    {
+        this.needsWrite = true;
+        this.needsRelight = true;
+    }
+    
+    public void invalidateFile()
+    {
+        this.needsWrite = true;
     }
 
     @Override
     public void setHeight(int x, int z, int val)
     {
-        setDirty(true);
+        invalidateFile();
         super.setHeight(x, z, val);
     }
 
     @Override
     public void setBiome(int x, int z, int val)
     {
-        setDirty(true);
+        invalidateFile();
         super.setBiome(x, z, val);
     }
 
     @Override
     public void setBlock(int x, int y, int z, Block block)
     {
-        setDirtyBlocks(true);
+        invalidateBlocks();
         super.setBlock(x, y, z, block);
     }
 
     @Override
     public void setBlockID(int x, int y, int z, int val)
     {
-        setDirtyBlocks(true);
+        invalidateBlocks();
         super.setBlockID(x, y, z, val);
     }
 
     @Override
     public void setMetaData(int x, int y, int z, int val)
     {
-        setDirtyBlocks(true);
+        invalidateBlocks();
         super.setMetaData(x, y, z, val);
     }
 
     @Override
     public void setBlockLight(int x, int y, int z, int val)
     {
-        setDirty(true);
+        invalidateLights();
         super.setBlockLight(x, y, z, val);
     }
 
     @Override
     public void setSkyLight(int x, int y, int z, int val)
     {
-        setDirty(true);
+        invalidateLights();
         super.setSkyLight(x, y, z, val);
     }
-
+    
     @Override
     protected void finalize() throws Throwable
     {

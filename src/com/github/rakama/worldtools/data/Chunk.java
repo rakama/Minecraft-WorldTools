@@ -203,7 +203,7 @@ public class Chunk
         if(index < 0 || index >= num_sections)
             return null;
 
-        synchronized (sections)
+        synchronized(this)
         {
             Section sec = sections[index];
             
@@ -266,14 +266,14 @@ public class Chunk
         return true;
     }
 
-    public void recomputeHeightmap()
+    public synchronized void recomputeHeightmap()
     {
         for(int z = 0; z < length; z++)
             for(int x = 0; x < width; x++)
                 recomputeHeight(x, z);
     }
 
-    protected void recomputeHeight(int x, int z)
+    protected synchronized void recomputeHeight(int x, int z)
     {
         int hindex = x + (z << 4);
         heightmap[hindex] = 0;
