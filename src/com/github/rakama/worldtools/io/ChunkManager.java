@@ -2,6 +2,7 @@ package com.github.rakama.worldtools.io;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,7 +59,7 @@ public class ChunkManager
         this.cache = Collections.synchronizedMap(new HashMap<ChunkID, ChunkReference>());
         this.relighter = new ChunkRelighter();
         
-        Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){closeAll();}});
+        Runtime.getRuntime().addShutdownHook(new CloseOpenChunks(this));
     }
     
     public Chunk getChunk(int x, int z)
@@ -290,6 +291,22 @@ public class ChunkManager
             log("CACHE_UNLOADED");
     }
 
+    public boolean hasUnwrittenChanges()
+    {
+        for(ChunkReference ref : cache.values())
+        {
+            TrackedChunk chunk = ref.get();
+            
+            if(chunk == null)
+                continue;
+            
+            if(chunk.isDirty())
+                return true;
+        }
+        
+        return false;
+    }
+    
     public void closeAll()
     {
         unloadCache();
@@ -349,4 +366,24 @@ final class ChunkReference extends SoftReference<TrackedChunk>
     {
         super(chunk);
     }        
+}
+
+final class CloseOpenChunks extends Thread
+{
+    WeakReference<ChunkManager> ref;
+    
+    public CloseOpenChunks(ChunkManager manager)
+    {
+        this.ref = new WeakReference<ChunkManager>(manager);
+    }
+
+    public void run()
+    {
+        ChunkManager manager = ref.get();
+        
+        if(manager == null)
+            return;
+        
+        manager.closeAll();
+    }    
 }

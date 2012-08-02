@@ -9,10 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import com.github.rakama.worldtools.coord.Coordinate2D;
-import com.github.rakama.worldtools.io.RegionInfo;
-
 import net.minecraft.world.level.chunk.storage.RegionFile;
+
+import com.github.rakama.worldtools.coord.Coordinate2D;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
