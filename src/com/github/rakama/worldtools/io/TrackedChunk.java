@@ -150,28 +150,23 @@ class TrackedChunk extends Chunk
     }
     
     @Override
-    public synchronized void clearBlockLights()
+    public void clearBlockLights()
     {
         invalidateLights();
         super.clearBlockLights();
     }
 
     @Override
-    public synchronized void clearSkyLights()
+    public void clearSkyLights()
     {
         invalidateLights();
         super.clearSkyLights();
     }
-    
+
     @Override
     protected void finalize() throws Throwable
     {
-        if(manager == null)
-            return;
-        
-        manager.flushChanges(this);
-        manager.deleteReferences(this);
-        manager = null;
+        manager.requestCleanup(this);
     }
     
     public static TrackedChunk loadChunk(CompoundTag tag, ChunkManager manager)

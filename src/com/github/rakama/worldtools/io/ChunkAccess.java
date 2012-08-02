@@ -133,7 +133,7 @@ public class ChunkAccess
         return chunk;
     }
     
-    protected TrackedChunk readTrackedChunk(int x, int z, ChunkManager manager) throws IOException
+    protected TrackedChunk readChunk(int x, int z, ChunkManager manager) throws IOException
     {
         if(debug)
             log("READ_CHUNK " + x + " " + z);

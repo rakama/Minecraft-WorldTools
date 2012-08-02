@@ -36,7 +36,6 @@ class RegionManager
 
     private Map<RegionID, RegionInfo> regions;
     private Map<RegionID, RegionInfo> cache;
-    private int cacheSize;
 
     protected RegionManager()
     {
@@ -45,9 +44,8 @@ class RegionManager
 
     protected RegionManager(int cacheSize)
     {
-        this.cacheSize = cacheSize;        
         regions = Collections.synchronizedMap(new TreeMap<RegionID, RegionInfo>());
-        cache = Collections.synchronizedMap(new RegionCache(this.cacheSize));
+        cache = Collections.synchronizedMap(new RegionCache(cacheSize));
     }
 
     protected void addFile(File file, int x, int z)
@@ -110,8 +108,10 @@ class RegionManager
     
     private void load(RegionInfo info)
     {
-        if(debug)
+        if(debug && info.getFile().exists())
             log("LOAD_REGION " + info.getRegionCoordinate().x + " " + info.getRegionCoordinate().z);
+        else if(debug && !info.getFile().exists())
+            log("NEW_REGION " + info.getRegionCoordinate().x + " " + info.getRegionCoordinate().z);
         
         info.setCached(new RegionFile(info.getFile()));
     }
@@ -174,7 +174,10 @@ class RegionManager
         protected boolean removeEldestEntry(Entry<RegionID, RegionInfo> eldest)
         {
             if(size() > capacity)
+            {
                 unload(eldest.getValue());
+                remove(eldest.getKey());
+            }
             
             return false;
         }
