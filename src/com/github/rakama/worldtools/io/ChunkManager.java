@@ -37,7 +37,7 @@ public class ChunkManager
     
     private final ChunkAccess access;
     private final TrackedChunk[] window;
-    private final Map<ChunkID, ChunkReference> cache;
+    private final Map<ChunkID, ChunkReference> cache; // TODO: turn old refs into weakreferences
     private final ChunkRelighter relighter;
     
     private final int windowSize, windowScale, windowMask;
@@ -71,11 +71,9 @@ public class ChunkManager
         if(chunk == null)
             return null;
         
+        // TODO: don't set to dirty unless it's actually creating a chunk
         if(create)
-        {
             chunk.setDirtyBlocks(true);
-            chunk.setDirtyLights(true);
-        }
         
         return chunk;
     }
@@ -86,9 +84,8 @@ public class ChunkManager
         
         if(tracker == null)
             return;
-        
-        tracker.setDirtyBlocks(dirty);
-        tracker.setDirtyLights(dirty);
+
+        tracker.setDirty(dirty);
     }
 
     protected synchronized TrackedChunk getChunk(int x, int z, boolean moveWindow, boolean create)
@@ -180,16 +177,16 @@ public class ChunkManager
     
     private void invalidateNeighborLights(int x, int z)
     {
-        getChunk(x - 1, z - 1, false, false).setDirtyLights(true);
-        getChunk(x, z - 1, false, false).setDirtyLights(true); 
-        getChunk(x + 1, z - 1, false, false).setDirtyLights(true); 
+        getChunk(x - 1, z - 1, false, false).setDirty(true);
+        getChunk(x, z - 1, false, false).setDirty(true); 
+        getChunk(x + 1, z - 1, false, false).setDirty(true); 
         
-        getChunk(x - 1, z, false, false).setDirtyLights(true);
-        getChunk(x + 1, z, false, false).setDirtyLights(true); 
+        getChunk(x - 1, z, false, false).setDirty(true);
+        getChunk(x + 1, z, false, false).setDirty(true); 
 
-        getChunk(x - 1, z + 1, false, false).setDirtyLights(true);
-        getChunk(x, z + 1, false, false).setDirtyLights(true); 
-        getChunk(x + 1, z + 1, false, false).setDirtyLights(true);
+        getChunk(x - 1, z + 1, false, false).setDirty(true);
+        getChunk(x, z + 1, false, false).setDirty(true); 
+        getChunk(x + 1, z + 1, false, false).setDirty(true);
     }
     
     private final boolean inWindow(int x, int z)
@@ -234,7 +231,7 @@ public class ChunkManager
                 if(index == 4)
                     continue;
                 
-                TrackedChunk neighbor = getChunk(x + x0 - 1, z + z0 - 1, true, false);
+                TrackedChunk neighbor = getChunk(x + x0 - 1, z + z0 - 1, false, false);
                 local[index] = neighbor;
             }           
         }

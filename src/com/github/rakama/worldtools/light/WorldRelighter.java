@@ -31,7 +31,7 @@ public class WorldRelighter
     protected static boolean relight_skip_boundaries = true;
     
     /** range [0, 4] - higher is faster, but consumes more memory **/
-    protected static int relight_batch_scale = 2;
+    protected static int relight_batch_scale = 3;
     
     protected EnumProfiler<Mode> profiler;
     protected ChunkAccess access;

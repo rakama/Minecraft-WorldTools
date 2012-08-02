@@ -1,5 +1,6 @@
 package com.github.rakama.worldtools.io;
 
+import com.github.rakama.worldtools.data.Block;
 import com.github.rakama.worldtools.data.Chunk;
 import com.mojang.nbt.ByteArrayTag;
 import com.mojang.nbt.CompoundTag;
@@ -26,14 +27,14 @@ import com.mojang.nbt.ListTag;
 class TrackedChunk extends Chunk
 {
     private ChunkManager manager;
-    private boolean dirtyBlocks, dirtyLights;
+    private boolean dirtyBlocks, dirty;
     
     public TrackedChunk(int x, int z, int[] heightmap, byte[] biomes, ChunkManager manager)
     {
         super(x, z, heightmap, biomes);
         this.manager = manager;
         this.dirtyBlocks = false;
-        this.dirtyLights = false;
+        this.dirty = false;
     }
     
     public boolean hasDirtyBlocks()
@@ -41,24 +42,75 @@ class TrackedChunk extends Chunk
         return dirtyBlocks;
     }
 
-    public boolean hasDirtyLights()
+    public boolean isDirty()
     {
-        return dirtyLights;
+        return dirty;
     }
     
     public void setDirtyBlocks(boolean dirty)
     {
         this.dirtyBlocks = dirty;
+        this.dirty |= dirty;
     }
 
-    public void setDirtyLights(boolean dirty)
+    public void setDirty(boolean dirty)
     {
-        this.dirtyLights = dirty;
+        this.dirty = dirty;
+        this.dirtyBlocks &= dirty;
     }
     
-    public boolean isClosed()
+    public boolean isOrphaned()
     {
         return manager == null;
+    }
+
+    @Override
+    public void setHeight(int x, int z, int val)
+    {
+        setDirty(true);
+        super.setHeight(x, z, val);
+    }
+
+    @Override
+    public void setBiome(int x, int z, int val)
+    {
+        setDirty(true);
+        super.setBiome(x, z, val);
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, Block block)
+    {
+        setDirtyBlocks(true);
+        super.setBlock(x, y, z, block);
+    }
+
+    @Override
+    public void setBlockID(int x, int y, int z, int val)
+    {
+        setDirtyBlocks(true);
+        super.setBlockID(x, y, z, val);
+    }
+
+    @Override
+    public void setMetaData(int x, int y, int z, int val)
+    {
+        setDirtyBlocks(true);
+        super.setMetaData(x, y, z, val);
+    }
+
+    @Override
+    public void setBlockLight(int x, int y, int z, int val)
+    {
+        setDirty(true);
+        super.setBlockLight(x, y, z, val);
+    }
+
+    @Override
+    public void setSkyLight(int x, int y, int z, int val)
+    {
+        setDirty(true);
+        super.setSkyLight(x, y, z, val);
     }
 
     public synchronized void flushChanges()
@@ -66,14 +118,14 @@ class TrackedChunk extends Chunk
         if(manager == null)
             return;
         
-        if(dirtyBlocks || dirtyLights)
+        if(dirtyBlocks || dirty)
         {
             manager.relight(this);
             manager.writeChunk(this);
         }
 
         dirtyBlocks = false;
-        dirtyLights = false;
+        dirty = false;
     }
     
     protected void close()

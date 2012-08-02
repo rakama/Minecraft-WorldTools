@@ -99,7 +99,8 @@ public class ChunkRelighter
                     cache.setChunk(x, z, null);
                     continue;
                 }
-
+                
+                // TODO: apply to wrapper, not source chunk
                 chunk.trimSections();
                 chunk.recomputeHeightmap();
                 

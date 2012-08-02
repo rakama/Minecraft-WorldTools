@@ -186,7 +186,7 @@ public class Chunk
         return sections[y];
     }
     
-    public Section[] getSections(int y)
+    public Section[] getSections()
     {
         return sections;
     }
