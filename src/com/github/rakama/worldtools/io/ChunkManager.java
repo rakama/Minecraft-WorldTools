@@ -291,17 +291,20 @@ public class ChunkManager
             log("CACHE_UNLOADED");
     }
 
-    public boolean hasUnwrittenChanges()
+    protected boolean hasUnwrittenChanges()
     {
-        for(ChunkReference ref : cache.values())
+        synchronized (cache)
         {
-            TrackedChunk chunk = ref.get();
-            
-            if(chunk == null)
-                continue;
-            
-            if(chunk.isDirty())
-                return true;
+            for(ChunkReference ref : cache.values())
+            {
+                TrackedChunk chunk = ref.get();
+                
+                if(chunk == null)
+                    continue;
+                
+                if(chunk.isDirty())
+                    return true;
+            }
         }
         
         return false;
