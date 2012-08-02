@@ -1,10 +1,12 @@
 package com.github.rakama.worldtools.data;
 
 import com.mojang.nbt.ByteArrayTag;
+import com.mojang.nbt.ByteTag;
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.IntArrayTag;
 import com.mojang.nbt.IntTag;
 import com.mojang.nbt.ListTag;
+import com.mojang.nbt.LongTag;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -225,7 +227,8 @@ public class Chunk
 
     public synchronized CompoundTag getTag()
     {
-        // TODO: generate new tag if tag is null
+        if(tag == null)
+            tag = createChunkTag();
 
         // recreate list to guarantee that new sections are included
         ListTag<CompoundTag> list = new ListTag<CompoundTag>();
@@ -238,6 +241,21 @@ public class Chunk
         level.put("Sections", list);
 
         return tag;
+    }
+    
+    private CompoundTag createChunkTag()
+    {
+        CompoundTag level = new CompoundTag("Level");
+        level.put("Biomes", new ByteArrayTag("Biomes", biomes));
+        level.put("HeightMap", new IntArrayTag("HeightMap", heightmap));
+        level.put("LastUpdate", new LongTag("LastUpdate", 0));
+        level.put("xPos", new IntTag("xPos", x));
+        level.put("zPos", new IntTag("zPos", z));
+        level.put("TerrainPopulated", new ByteTag("TerrainPopulated", (byte)1));
+
+        CompoundTag root = new CompoundTag("");
+        root.put("Level", level);
+        return root;
     }
 
     protected void checkBounds(int x, int z)

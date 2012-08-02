@@ -28,6 +28,15 @@ class TrackedChunk extends Chunk
 {
     private ChunkManager manager;
     private boolean needsWrite, needsRelight, needsNeighborNotify;
+
+    public TrackedChunk(int x, int z, ChunkManager manager)
+    {
+        super(x, z);
+        this.manager = manager;
+        this.needsWrite = false;
+        this.needsRelight = false;
+        this.needsNeighborNotify = false;
+    }
     
     public TrackedChunk(int x, int z, int[] heightmap, byte[] biomes, ChunkManager manager)
     {
@@ -132,12 +141,26 @@ class TrackedChunk extends Chunk
         invalidateLights();
         super.setBlockLight(x, y, z, val);
     }
-
+    
     @Override
     public void setSkyLight(int x, int y, int z, int val)
     {
         invalidateLights();
         super.setSkyLight(x, y, z, val);
+    }
+    
+    @Override
+    public synchronized void clearBlockLights()
+    {
+        invalidateLights();
+        super.clearBlockLights();
+    }
+
+    @Override
+    public synchronized void clearSkyLights()
+    {
+        invalidateLights();
+        super.clearSkyLights();
     }
     
     @Override
@@ -164,6 +187,8 @@ class TrackedChunk extends Chunk
 
         TrackedChunk chunk;
         chunk = new TrackedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
+        
+        // TODO: create TrackedSection to catch Section changes
         chunk.loadSections(sections);
         chunk.tag = tag;
 

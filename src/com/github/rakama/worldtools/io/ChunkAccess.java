@@ -120,12 +120,12 @@ public class ChunkAccess
         if(debug)
             log("READ_CHUNK " + x + " " + z);
         
-        // decompress new chunk
         DataInputStream dis = getDataInputStream(x, z);
 
         if(dis == null)
             return null;
 
+        // decompress chunk
         CompoundTag tag = NbtIo.read(dis);
         Chunk chunk = Chunk.loadChunk(tag);
         dis.close();
@@ -138,12 +138,12 @@ public class ChunkAccess
         if(debug)
             log("READ_CHUNK " + x + " " + z);
         
-        // decompress new chunk
         DataInputStream dis = getDataInputStream(x, z);
 
         if(dis == null)
             return null;
 
+        // decompress chunk
         CompoundTag tag = NbtIo.read(dis);
         TrackedChunk chunk = TrackedChunk.loadChunk(tag, manager);
         dis.close();
@@ -180,11 +180,22 @@ public class ChunkAccess
         RegionFile region = regionManager.getRegionFile(x >> 5, z >> 5);
 
         if(region == null)
-            throw new IOException();
+        {
+            region = createRegionFile(x >> 5, z >> 5);
+            if(region == null)
+                throw new IOException();
+        }
 
         return region.getChunkDataOutputStream(x & 0x1F, z & 0x1F);
     }
 
+    private RegionFile createRegionFile(int x, int z) throws IOException
+    {
+        String path = regionDirectory.getCanonicalPath() + "/r." + x + "." + z + ".mca";        
+        regionManager.addFile(new File(path), x, z);
+        return regionManager.getRegionFile(x, z);
+    }
+    
     public Collection<RegionInfo> getRegions()
     {
         return regionManager.getRegions();
@@ -195,7 +206,7 @@ public class ChunkAccess
         return regionDirectory;
     }
     
-    public RegionManager getRegionManager()
+    protected RegionManager getRegionManager()
     {
         return regionManager;
     }

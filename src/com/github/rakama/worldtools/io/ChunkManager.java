@@ -69,16 +69,7 @@ public class ChunkManager
     
     public Chunk getChunk(int x, int z, boolean create)
     {
-        TrackedChunk chunk = getChunk(x, z, true, create);
-        
-        if(chunk == null)
-            return null;
-        
-        // TODO: don't set to dirty unless it's actually creating a chunk
-        if(create)
-            chunk.invalidateBlocks();
-        
-        return chunk;
+        return getChunk(x, z, true, create);
     }
     
     protected synchronized TrackedChunk getChunk(int x, int z, boolean moveWindow, boolean create)
@@ -119,8 +110,10 @@ public class ChunkManager
             TrackedChunk chunk = ref.get();
             if(chunk != null)
             {
+                // place chunk in window
                 if(winIndex > -1) 
-                    window[winIndex] = chunk;
+                    window[winIndex] = chunk;     
+                
                 return chunk;
             }
             else
@@ -130,12 +123,26 @@ public class ChunkManager
         if(debug)
             log("CACHE_MISS " + x + " " + z);
         
-        // load from chunk access
+        // try chunk access
         
         TrackedChunk chunk = readChunk(x, z);
+        
+        if(chunk == null && create)
+        {         
+            if(debug)
+                log("NEW_CHUNK " + x + " " + z);
+          
+            chunk = new TrackedChunk(x, z, this);
+            chunk.invalidateFile();
+        }
+        
+        // place chunk in cache
         cache.put(id, new ChunkReference(chunk));
+
+        // place chunk in window
         if(winIndex > -1) 
             window[winIndex] = chunk;
+        
         return chunk;
     }
     
@@ -160,14 +167,14 @@ public class ChunkManager
         int x = chunk.getX();
         int z = chunk.getZ();
         
-        getChunk(x - 1, z - 1, false, false).invalidateLights();
-        getChunk(x, z - 1, false, false).invalidateLights();
-        getChunk(x + 1, z - 1, false, false).invalidateLights();        
-        getChunk(x - 1, z, false, false).invalidateLights();
-        getChunk(x + 1, z, false, false).invalidateLights();
-        getChunk(x - 1, z + 1, false, false).invalidateLights();
-        getChunk(x, z + 1, false, false).invalidateLights();
-        getChunk(x + 1, z + 1, false, false).invalidateLights();
+        getChunk(x - 1, z - 1, false, true).invalidateLights();
+        getChunk(x, z - 1, false, true).invalidateLights();
+        getChunk(x + 1, z - 1, false, true).invalidateLights();        
+        getChunk(x - 1, z, false, true).invalidateLights();
+        getChunk(x + 1, z, false, true).invalidateLights();
+        getChunk(x - 1, z + 1, false, true).invalidateLights();
+        getChunk(x, z + 1, false, true).invalidateLights();
+        getChunk(x + 1, z + 1, false, true).invalidateLights();
         
         chunk.validateNeighborNotify();
     }
@@ -274,7 +281,7 @@ public class ChunkManager
                 
                 TrackedChunk neighbor = getChunk(x + x0 - 1, z + z0 - 1, false, false);
                 local[index] = neighbor;
-            }           
+            }
         }
 
         relighter.lightChunks(local);

@@ -29,7 +29,7 @@ import com.github.rakama.worldtools.coord.Coordinate2D;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-public class RegionManager 
+class RegionManager 
 {
     protected final static int region_cache_size = 9;
     protected final boolean debug = false;
