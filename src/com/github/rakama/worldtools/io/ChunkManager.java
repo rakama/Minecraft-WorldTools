@@ -32,8 +32,8 @@ import com.github.rakama.worldtools.light.ChunkRelighter;
  */
 
 public class ChunkManager
-{    
-    protected final static int default_window_scale = 5;
+{
+    protected final static int default_window_scale = 2;
     protected final boolean debug = false;
     
     private final ChunkAccess access;
@@ -81,14 +81,14 @@ public class ChunkManager
         return chunk;
     }
     
-    public void setDirty(int x, int z, boolean dirty)
+    protected void setDirty(int x, int z, boolean dirty)
     {
-        TrackedChunk tracker = getChunk(x, z, true, dirty);
+        TrackedChunk chunk = getChunk(x, z, true, dirty);
         
-        if(tracker == null)
+        if(chunk == null)
             return;
 
-        tracker.setDirty(dirty);
+        chunk.setDirty(dirty);
     }
 
     protected synchronized TrackedChunk getChunk(int x, int z, boolean moveWindow, boolean create)
@@ -102,9 +102,9 @@ public class ChunkManager
         if(inWindow(winX, winZ))
         {
             winIndex = winX + (winZ << windowScale);       
-            TrackedChunk tracker = window[winIndex];       
-            if(tracker != null)
-                return tracker;
+            TrackedChunk chunk = window[winIndex];       
+            if(chunk != null)
+                return chunk;
         }
         else if(moveWindow)
         {
@@ -126,12 +126,12 @@ public class ChunkManager
         
         if(ref != null)
         {
-            TrackedChunk tracker = ref.get();
-            if(tracker != null)
+            TrackedChunk chunk = ref.get();
+            if(chunk != null)
             {
                 if(winIndex > -1) 
-                    window[winIndex] = tracker;
-                return tracker;
+                    window[winIndex] = chunk;
+                return chunk;
             }
             else
                 cache.remove(id);
@@ -142,11 +142,11 @@ public class ChunkManager
         
         // load from chunk access
         
-        TrackedChunk tracker = readChunk(x, z);
-        cache.put(id, new ChunkReference(tracker));
+        TrackedChunk chunk = readChunk(x, z);
+        cache.put(id, new ChunkReference(chunk));
         if(winIndex > -1) 
-            window[winIndex] = tracker;        
-        return tracker;
+            window[winIndex] = chunk;
+        return chunk;
     }
     
     private void setWindow(int x0, int z0)
@@ -165,21 +165,19 @@ public class ChunkManager
         {
             for(int z=windowMinZ; z<windowMinZ + windowSize; z++)
             { 
-                TrackedChunk tracker = window[index];
+                TrackedChunk chunk = window[index++];
                 
-                if(tracker == null)
+                if(chunk == null)
                     continue;
 
-                if(tracker.hasDirtyBlocks())
+                if(chunk.hasDirtyBlocks())
                     invalidateNeighborLights(x, z);
-                
-                index++;   
             }
         }
     }
     
     private void invalidateNeighborLights(int x, int z)
-    {
+    {        
         getChunk(x - 1, z - 1, false, false).setDirty(true);
         getChunk(x, z - 1, false, false).setDirty(true); 
         getChunk(x + 1, z - 1, false, false).setDirty(true); 
@@ -207,17 +205,65 @@ public class ChunkManager
         return mask;
     }
 
+    public Collection<RegionInfo> getRegions()
+    {
+        return access.getRegions();
+    }
+
     protected ChunkAccess getChunkAccess()
     {
         return access;
     }
 
-    public Collection<RegionInfo> getRegions()
+    protected synchronized boolean hasDirtyChunks()
     {
-        return access.getRegions();
+        for(ChunkReference ref : cache.values())
+        {
+            TrackedChunk chunk = ref.get();
+            
+            if(chunk == null)
+                continue;
+            
+            if(chunk.isDirty())
+                return true;
+        }
+        
+        return false;
+    }
+
+    protected synchronized boolean flushChanges(TrackedChunk chunk)
+    {
+        if(debug)
+            log("FLUSH_CHANGES " + chunk.getX() + " " + chunk.getZ());
+    
+        boolean modified = false;
+        
+        if(chunk.isDirty())
+        {
+            relightChunk(chunk);
+            writeChunk(chunk);
+            modified = true;
+        }
+
+        chunk.setDirty(false);
+        return modified;
     }
     
-    protected void relight(Chunk chunk)
+    protected synchronized void deleteReferences(Chunk chunk)
+    {                
+        cache.remove(new ChunkID(chunk.getX(), chunk.getZ()));
+        
+        int winX = chunk.getX() - windowMinX;
+        int winZ = chunk.getZ() - windowMinZ;
+        
+        if(inWindow(winX, winZ))
+        {
+            int index = winX + (winZ << windowScale);       
+            window[index] = null;
+        }
+    }
+    
+    protected synchronized void relightChunk(Chunk chunk)
     {
         int x0 = chunk.getX();
         int z0 = chunk.getZ();
@@ -241,85 +287,48 @@ public class ChunkManager
 
         relighter.lightChunks(local);
     }
-    
-    protected void unloadCache(Chunk chunk)
-    {                
-        if(debug)
-            log("UNLOAD_CACHE " + chunk.getX() + " " + chunk.getZ());
-    
-        cache.remove(new ChunkID(chunk.getX(), chunk.getZ()));
-        
-        int winX = chunk.getX() - windowMinX;
-        int winZ = chunk.getZ() - windowMinZ;
-        
-        if(inWindow(winX, winZ))
-        {
-            int index = winX + (winZ << windowScale);       
-            window[index] = null;
-        }
-    }
 
-    protected void unloadCache()
+    protected synchronized void unloadAll()
     {        
         if(debug)
             log("UNLOADING_CACHE *");
         
         invalidateLights();
-        Arrays.fill(window, null);        
         Collection<ChunkReference> values = cache.values();
         
-        while(!values.isEmpty())
-        {      
-            Iterator<ChunkReference> iter;
-            
-            synchronized(cache)
-            {      
-                iter = new ArrayList<ChunkReference>(values).iterator();        
-                cache.clear();
-            }
+        boolean dirty = true;
+        
+        while(dirty)
+        {
+            Iterator<ChunkReference> iter = new ArrayList<ChunkReference>(values).iterator();            
+            dirty = false;
             
             while(iter.hasNext())
             {
                 ChunkReference ref = iter.next();
-                TrackedChunk tracker = ref.get();
-                if(tracker != null)
-                    tracker.close();
+                TrackedChunk chunk = ref.get();
+                if(chunk != null)
+                    dirty |= flushChanges(chunk);
              }
-        }
+        }        
+
+        cache.clear();
+        Arrays.fill(window, null);
 
         if(debug)
             log("CACHE_UNLOADED");
     }
-
-    protected boolean hasUnwrittenChanges()
-    {
-        synchronized (cache)
-        {
-            for(ChunkReference ref : cache.values())
-            {
-                TrackedChunk chunk = ref.get();
-                
-                if(chunk == null)
-                    continue;
-                
-                if(chunk.isDirty())
-                    return true;
-            }
-        }
-        
-        return false;
-    }
     
     public void closeAll()
     {
-        unloadCache();
+        unloadAll();
         access.closeAll();
     }
 
     @Override
     protected void finalize() throws Exception
     {
-        unloadCache();
+        unloadAll();
     }
     
     protected TrackedChunk readChunk(int x, int z)

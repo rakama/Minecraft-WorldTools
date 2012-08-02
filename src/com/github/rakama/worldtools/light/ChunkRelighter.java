@@ -27,7 +27,7 @@ public class ChunkRelighter
 
     protected CircularBuffer queue;
     protected LightCache cache;
-    protected LightWrapper[] wrapper;
+    protected ChunkProtector[] protector;
 
     protected final int span, width, length, height;
 
@@ -48,12 +48,12 @@ public class ChunkRelighter
 
         queue = new CircularBuffer(width * length * height);
         cache = new LightCache(span, span);
-        wrapper = new LightWrapper[span * span];
+        protector = new ChunkProtector[span * span];
 
         for(int z = 0; z < span; z++)
             for(int x = 0; x < span; x++)
                 if(isImmutable(x, z))
-                    wrapper[x + z * span] = new LightWrapper();
+                    protector[x + z * span] = new ChunkProtector();
     }
 
     public int getSpan()
@@ -83,33 +83,31 @@ public class ChunkRelighter
         propagateLights();
         
         cache.clear();
-        clearWrappers();
+        clearProtectors();
     }
 
     protected void fillLightCache(Chunk[] localChunks)
     {
         for(int z = 0; z < span; z++)
-        {
             for(int x = 0; x < span; x++)
-            {
-                Chunk chunk = localChunks[x + z * span];
-                
-                if(chunk == null)
-                {
-                    cache.setChunk(x, z, null);
-                    continue;
-                }
-                
-                // TODO: apply to wrapper, not source chunk
-                chunk.trimSections();
-                chunk.recomputeHeightmap();
-                
-                if(isImmutable(x, z))
-                    cache.setChunk(x, z, getWrapper(x, z, chunk));
-                else
-                    cache.setChunk(x, z, localChunks[x + z * span]);
-            }            
+                setChunk(x, z, localChunks[x + z * span]);
+    }
+    
+    private void setChunk(int x, int z, Chunk chunk)
+    {
+        if(chunk == null)
+        {
+            cache.setChunk(x, z, null);
+            return;
         }
+        
+        if(isImmutable(x, z))
+            chunk = getProtector(x, z, chunk);
+
+        chunk.trimSections();
+        chunk.recomputeHeightmap();                  
+            
+        cache.setChunk(x, z, chunk);   
     }
     
     protected void propagateLights()
@@ -170,22 +168,22 @@ public class ChunkRelighter
         return true;
     }
 
-    private LightWrapper getWrapper(int x, int z, Chunk chunk)
+    private ChunkProtector getProtector(int x, int z, Chunk chunk)
     {
         if(chunk == null)
             return null;
         
-        LightWrapper p = wrapper[x + z * span];
+        ChunkProtector p = protector[x + z * span];
         p.assign(chunk);
         return p;
     }
     
-    private void clearWrappers()
+    private void clearProtectors()
     {
         for(int z = 0; z < span; z++)
             for(int x = 0; x < span; x++)
                 if(isImmutable(x, z))
-                    wrapper[x + z * span].clear();
+                    protector[x + z * span].clear();
     }
     
     private boolean isImmutable(int x, int z)

@@ -170,11 +170,6 @@ public class RegionManager
             this.capacity = capacity;
         }
 
-        public RegionInfo get(Object key)
-        {
-            throw new UnsupportedOperationException();
-        }
-        
         @Override
         protected boolean removeEldestEntry(Entry<RegionID, RegionInfo> eldest)
         {

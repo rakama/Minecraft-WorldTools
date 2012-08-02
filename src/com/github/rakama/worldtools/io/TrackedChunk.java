@@ -58,11 +58,6 @@ class TrackedChunk extends Chunk
         this.dirty = dirty;
         this.dirtyBlocks &= dirty;
     }
-    
-    public boolean isOrphaned()
-    {
-        return manager == null;
-    }
 
     @Override
     public void setHeight(int x, int z, int val)
@@ -113,37 +108,16 @@ class TrackedChunk extends Chunk
         super.setSkyLight(x, y, z, val);
     }
 
-    public synchronized void flushChanges()
-    {
-        if(manager == null)
-            return;
-        
-        if(dirtyBlocks || dirty)
-        {
-            manager.relight(this);
-            manager.writeChunk(this);
-        }
-
-        dirtyBlocks = false;
-        dirty = false;
-    }
-    
-    protected void close()
-    {
-        flushChanges();
-        manager = null;
-    }
-    
     @Override
     protected void finalize() throws Throwable
     {
         if(manager == null)
             return;
         
-        flushChanges();
-        manager.unloadCache(this);
+        manager.flushChanges(this);
+        manager.deleteReferences(this);
         manager = null;
-    }    
+    }
     
     public static TrackedChunk loadChunk(CompoundTag tag, ChunkManager manager)
     {
@@ -156,7 +130,8 @@ class TrackedChunk extends Chunk
         IntTag xPos = (IntTag) level.get("xPos");
         IntTag zPos = (IntTag) level.get("zPos");
 
-        TrackedChunk chunk = new TrackedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
+        TrackedChunk chunk;
+        chunk = new TrackedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
         chunk.loadSections(sections);
         chunk.tag = tag;
 

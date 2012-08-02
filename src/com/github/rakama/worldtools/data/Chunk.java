@@ -181,24 +181,19 @@ public class Chunk
         return sec.getSkyLight(x, y & 0xF, z);
     }
     
-    public Section getSection(int y)
-    {
-        return sections[y];
-    }
-    
-    public Section[] getSections()
-    {
-        return sections;
-    }
-
-    public int[] getHeightmap()
+    protected int[] getHeightmap()
     {
         return heightmap;
     }
 
-    public byte[] getBiomes()
+    protected byte[] getBiomes()
     {
         return biomes;
+    }
+    
+    public Section getSection(int y)
+    {
+        return sections[y];
     }
     
     protected Section getContainingSection(int y, boolean create)
@@ -207,16 +202,19 @@ public class Chunk
 
         if(index < 0 || index >= num_sections)
             return null;
- 
-        Section sec = sections[index];
-        
-        if(create && sec == null)
+
+        synchronized (sections)
         {
-            createSection(index);
-            sec = sections[index];
+            Section sec = sections[index];
+            
+            if(create && sec == null)
+            {
+                createSection(index);
+                sec = sections[index];
+            }
+            
+            return sec;
         }
-        
-        return sec;
     }
     
     private synchronized void createSection(int index)

@@ -2,6 +2,7 @@ package com.github.rakama.worldtools.light;
 
 import java.util.Arrays;
 
+import com.github.rakama.worldtools.data.Block;
 import com.github.rakama.worldtools.data.Chunk;
 import com.github.rakama.worldtools.data.Section;
 import com.github.rakama.worldtools.util.NibbleArray;
@@ -22,18 +23,17 @@ import com.github.rakama.worldtools.util.NibbleArray;
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-final class LightWrapper extends Chunk
+final class ChunkProtector extends Chunk
 {    
-    NibbleArray[] light;
+    NibbleArray[] tempLights;
     
-    public LightWrapper()
+    public ChunkProtector()
     {
-        super(-1, -1, null, null);
-    
-        light = new NibbleArray[num_sections];
+        super(-1, -1);
         
+        tempLights = new NibbleArray[num_sections];
         for(int i=0; i<num_sections; i++)
-            light[i] = new NibbleArray(Section.volume);
+            tempLights[i] = new NibbleArray(Section.volume);
     }
     
     public void assign(Chunk chunk)
@@ -42,53 +42,49 @@ final class LightWrapper extends Chunk
             throw new NullPointerException();
         
         x = chunk.getX();
-        z = chunk.getX();
-        heightmap = chunk.getHeightmap();
-        biomes = chunk.getBiomes();
+        z = chunk.getZ();
         
         for(int i=0; i<num_sections; i++)
-        {
-            Section sec = chunk.getSection(i);
-            
-            if(sec == null)
-            {
-                sections[i] = null;
-                continue;
-            }
-            
-            sections[i] = new Section(i, sec.getBlockIDs(), 
-                    sec.getMetaData(), light[i], light[i]);
-        }
+            sections[i] = cloneSection(i, chunk.getSection(i));
     }
-    
-    @Override
-    protected Section getContainingSection(int y, boolean create)
+
+    private Section cloneSection(int y, Section sec)
     {
-        int index = y >> 4;
-
-        if(index < 0 || index >= num_sections)
+        if(sec == null)
             return null;
-
-        synchronized (sections)
-        {        
-            Section sec = sections[index];
-            
-            if(create && sec == null)
-            {
-                sec = new Section(y >> 4);
-                sections[index] = sec;
-            }
-            
-            return sec;
-        }
+        
+        return new Section(y, sec.getBlockIDs(), sec.getMetaData(), 
+                tempLights[y], tempLights[y]);
     }
     
     public void clear()
     {
         x = -1;
         z = -1;
-        heightmap = null;
-        biomes = null;
         Arrays.fill(sections, null);
+    }
+    
+    @Override
+    public void setBiome(int x, int z, int val)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, Block block)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setBlockID(int x, int y, int z, int val)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setMetaData(int x, int y, int z, int val)
+    {
+        throw new UnsupportedOperationException();
     }
 }
