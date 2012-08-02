@@ -52,11 +52,13 @@ public class ChunkManager
     {
         this.access = access;
         this.windowScale = windowScale;
-        this.windowSize = 1 << windowScale;   
+        this.windowSize = 1 << windowScale;
         this.windowMask = bitmask(windowScale);
         this.window = new TrackedChunk[windowSize * windowSize];
         this.cache = Collections.synchronizedMap(new HashMap<ChunkID, ChunkReference>());
         this.relighter = new ChunkRelighter();
+        
+        Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){closeAll();}});
     }
     
     public Chunk getChunk(int x, int z)
