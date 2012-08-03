@@ -114,6 +114,11 @@ public class WorldTools
         WorldRelighter.relightWorld(access, true);
     }
     
+    public void closeAll()
+    {
+        manager.closeAll();
+    }
+    
     public static void main(String[] args)
     {
         System.out.println("WorldTools v0.1");

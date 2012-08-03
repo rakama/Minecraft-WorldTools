@@ -6,7 +6,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -37,7 +36,7 @@ import com.github.rakama.worldtools.light.ChunkRelighter;
 public class ChunkManager
 {
     protected final static int soft_cache_size = 512;
-    protected final static int cleanup_minimum_size = 8;
+    protected final static int minimum_cleanup_size = 8;    
     protected final static int default_window_scale = 3;
     protected final boolean debug = false;
     
@@ -72,14 +71,14 @@ public class ChunkManager
     public Chunk getChunk(int x, int z)
     {
         Chunk chunk = getChunk(x, z, true, false);
-        doCleanup(cleanup_minimum_size);
+        doCleanup(minimum_cleanup_size);
         return chunk;
     }
     
     public Chunk getChunk(int x, int z, boolean create)
     {
         Chunk chunk = getChunk(x, z, true, create);
-        doCleanup(cleanup_minimum_size);
+        doCleanup(minimum_cleanup_size);
         return chunk;
     }
     
@@ -543,11 +542,11 @@ final class CloseOpenChunks extends Thread
 
     public void run()
     {
-        ChunkManager manager = ref.get();
-        
+        ChunkManager manager = ref.get();        
         if(manager == null)
             return;
         
+        System.gc();        
         manager.closeAll();
     }    
 }
