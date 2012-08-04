@@ -222,8 +222,6 @@ public class ChunkManager
         if(cleanup.size() < minimumQueueSize)
             return false;
 
-        log("doCleanup " + cleanup.size());
-
         synchronized(cleanup)
         {
             List<TrackedChunk> remove = new ArrayList<TrackedChunk>(cleanup);
