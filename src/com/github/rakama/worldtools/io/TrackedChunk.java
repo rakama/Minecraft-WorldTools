@@ -1,5 +1,6 @@
 package com.github.rakama.worldtools.io;
 
+import com.github.rakama.worldtools.coord.Coordinate2D;
 import com.github.rakama.worldtools.data.Block;
 import com.github.rakama.worldtools.data.Chunk;
 import com.mojang.nbt.ByteArrayTag;
@@ -197,5 +198,13 @@ class TrackedChunk extends Chunk
         chunk.tag = tag;
 
         return chunk;
+    }
+}
+
+final class ChunkID extends Coordinate2D
+{    
+    public ChunkID(int x, int z)
+    {
+        super(x, z);
     }
 }

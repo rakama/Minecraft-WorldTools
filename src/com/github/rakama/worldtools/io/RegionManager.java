@@ -10,8 +10,6 @@ import java.util.TreeMap;
 
 import net.minecraft.world.level.chunk.storage.RegionFile;
 
-import com.github.rakama.worldtools.coord.Coordinate2D;
-
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
@@ -105,6 +103,7 @@ class RegionManager
         cache.put(info.getID(), info);
     }
     
+    @SuppressWarnings("unused")
     private void load(RegionInfo info)
     {
         if(debug && info.getFile().exists())
@@ -185,13 +184,5 @@ class RegionManager
     protected final void log(String str)
     {
         System.out.println(str);
-    }
-}
-
-final class RegionID extends Coordinate2D
-{    
-    public RegionID(int x, int z)
-    {
-        super(x, z);
     }
 }

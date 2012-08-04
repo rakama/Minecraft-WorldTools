@@ -80,3 +80,11 @@ public class RegionInfo
         return cached != null;
     }
 }
+
+final class RegionID extends Coordinate2D
+{    
+    public RegionID(int x, int z)
+    {
+        super(x, z);
+    }
+}
