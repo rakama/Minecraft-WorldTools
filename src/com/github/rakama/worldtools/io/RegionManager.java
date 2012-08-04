@@ -3,7 +3,6 @@ package com.github.rakama.worldtools.io;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +30,7 @@ import com.github.rakama.worldtools.coord.Coordinate2D;
 
 class RegionManager 
 {
-    protected final static int region_cache_size = 9;
+    protected final static int region_cache_size = 12;
     protected final boolean debug = false;
 
     private Map<RegionID, RegionInfo> regions;
@@ -44,8 +43,8 @@ class RegionManager
 
     protected RegionManager(int cacheSize)
     {
-        regions = Collections.synchronizedMap(new TreeMap<RegionID, RegionInfo>());
-        cache = Collections.synchronizedMap(new RegionCache(cacheSize));
+        regions = new TreeMap<RegionID, RegionInfo>();
+        cache = new RegionCache(cacheSize);
     }
 
     protected void addFile(File file, int x, int z)
@@ -89,7 +88,7 @@ class RegionManager
         if(!info.isCached())
             load(info);
             
-        cache.put(info.getRegionID(), info);
+        cache.put(info.getID(), info);
     }
 
     protected void forceUnload(RegionInfo info)
@@ -97,13 +96,13 @@ class RegionManager
         if(info != null)
             unload(info);   
         
-        cache.remove(info.getRegionID());  
+        cache.remove(info.getID());  
     }
     
     protected void forceRefresh(RegionInfo info)
     {
-        cache.remove(info.getRegionID());         
-        cache.put(info.getRegionID(), info);
+        cache.remove(info.getID());         
+        cache.put(info.getID(), info);
     }
     
     private void load(RegionInfo info)

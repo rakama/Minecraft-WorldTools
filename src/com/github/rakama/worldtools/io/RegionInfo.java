@@ -50,7 +50,7 @@ public class RegionInfo
         return file;
     }
 
-    protected RegionID getRegionID()
+    protected RegionID getID()
     {
         return id;
     }

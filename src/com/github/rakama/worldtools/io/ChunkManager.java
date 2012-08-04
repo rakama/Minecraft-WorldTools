@@ -1,19 +1,14 @@
 package com.github.rakama.worldtools.io;
 
 import java.io.IOException;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 
-import com.github.rakama.worldtools.coord.Coordinate2D;
 import com.github.rakama.worldtools.data.Chunk;
 import com.github.rakama.worldtools.light.ChunkRelighter;
 
@@ -35,9 +30,9 @@ import com.github.rakama.worldtools.light.ChunkRelighter;
 
 public class ChunkManager
 {
-    protected final static int soft_cache_size = 512;
-    protected final static int minimum_cleanup_size = 8;    
-    protected final static int default_window_scale = 3;
+    protected final static int default_max_cache_size = 2048;
+    protected final static int minimum_cleanup_size = 32;
+    protected final static int default_window_scale = 2;
     protected final boolean debug = false;
     
     private final ChunkAccess access;
@@ -48,10 +43,11 @@ public class ChunkManager
     
     private final int windowSize, windowScale, windowMask;
     private int windowMinX, windowMinZ, reads, writes;
+    private boolean lightingEnabled;
     
     public ChunkManager(ChunkAccess access)
     {
-        this(access, default_window_scale, soft_cache_size);
+        this(access, default_window_scale, default_max_cache_size);
     }
         
     protected ChunkManager(ChunkAccess access, int windowScale, int cacheSize)
@@ -64,25 +60,36 @@ public class ChunkManager
         this.cache = new ChunkCache(this, cacheSize);
         this.relighter = new ChunkRelighter();
         this.cleanup = new LinkedList<TrackedChunk>();
+        this.lightingEnabled = true;
         
         Runtime.getRuntime().addShutdownHook(new CloseOpenChunks(this));
+    }
+
+    public void enableLighting(boolean enabled)
+    {
+        lightingEnabled = enabled;
+    }
+    
+    public boolean isLightingEnabled()
+    {
+        return lightingEnabled;
     }
     
     public Chunk getChunk(int x, int z)
     {
-        Chunk chunk = getChunk(x, z, true, false);
+        Chunk chunk = getChunk(x, z, true, true, false);
         doCleanup(minimum_cleanup_size);
         return chunk;
     }
     
     public Chunk getChunk(int x, int z, boolean create)
     {
-        Chunk chunk = getChunk(x, z, true, create);
+        Chunk chunk = getChunk(x, z, true, true, create);
         doCleanup(minimum_cleanup_size);
         return chunk;
     }
     
-    protected TrackedChunk getChunk(int x, int z, boolean moveWindow, boolean create)
+    protected TrackedChunk getChunk(int x, int z, boolean priority, boolean moveWindow, boolean create)
     {      
         // try window
         
@@ -112,22 +119,15 @@ public class ChunkManager
         
         // try soft cache
         
-        ChunkID id = new ChunkID(x, z);
-        ChunkReference ref = cache.get(id);
+        TrackedChunk chunk = cache.get(x, z, priority);
         
-        if(ref != null)
+        if(chunk != null)
         {
-            TrackedChunk chunk = ref.get();
-            if(chunk != null)
-            {
-                // place chunk in window
-                if(winIndex > -1) 
-                    window[winIndex] = chunk;     
-                
-                return chunk;
-            }
-            else
-                cache.remove(id);
+            // place chunk in window
+            if(winIndex > -1) 
+                window[winIndex] = chunk;     
+            
+            return chunk;
         }
 
         if(debug)
@@ -135,10 +135,13 @@ public class ChunkManager
         
         // try chunk access
         
-        TrackedChunk chunk = readChunk(x, z);
+        chunk = readChunk(x, z);
         
-        if(chunk == null && create)
-        {         
+        if(chunk == null)
+        {    
+            if(!create)
+                return null;     
+            
             if(debug)
                 log("NEW_CHUNK " + x + " " + z);
           
@@ -147,7 +150,7 @@ public class ChunkManager
         }
         
         // place chunk in cache
-        cache.put(id, new ChunkReference(chunk));
+        cache.put(chunk, priority);
 
         // place chunk in window
         if(winIndex > -1) 
@@ -158,7 +161,9 @@ public class ChunkManager
     
     private void setWindow(int x0, int z0)
     {        
-        invalidateLights();
+        if(lightingEnabled)
+            invalidateLights();
+        
         int offset = windowSize >> 1;
         windowMinX = x0 - offset;
         windowMinZ = z0 - offset;
@@ -177,16 +182,23 @@ public class ChunkManager
         int x = chunk.getX();
         int z = chunk.getZ();
         
-        getChunk(x - 1, z - 1, false, true).invalidateLights();
-        getChunk(x, z - 1, false, true).invalidateLights();
-        getChunk(x + 1, z - 1, false, true).invalidateLights();        
-        getChunk(x - 1, z, false, true).invalidateLights();
-        getChunk(x + 1, z, false, true).invalidateLights();
-        getChunk(x - 1, z + 1, false, true).invalidateLights();
-        getChunk(x, z + 1, false, true).invalidateLights();
-        getChunk(x + 1, z + 1, false, true).invalidateLights();
+        notifyIfExists(getChunk(x - 1, z - 1, false, false, false));
+        notifyIfExists(getChunk(x, z - 1, false, false, false));
+        notifyIfExists(getChunk(x + 1, z - 1, false, false, false));
+        notifyIfExists(getChunk(x - 1, z, false, false, false));
+        notifyIfExists(getChunk(x + 1, z, false, false, false));
+        notifyIfExists(getChunk(x - 1, z + 1, false, false, false));
+        notifyIfExists(getChunk(x, z + 1, false, false, false));
+        notifyIfExists(getChunk(x + 1, z + 1, false, false, false));
         
+        cache.refresh(chunk, true);        
         chunk.validateNeighborNotify();
+    }
+    
+    private void notifyIfExists(TrackedChunk chunk)
+    {
+        if(chunk != null)
+            chunk.invalidateLights();
     }
     
     private final boolean inWindow(int x, int z)
@@ -196,6 +208,9 @@ public class ChunkManager
 
     protected void requestCleanup(TrackedChunk chunk)
     {
+        if(chunk == null)
+            return;
+        
         synchronized(cleanup)
         {
             cleanup.add(chunk);
@@ -206,7 +221,9 @@ public class ChunkManager
     {
         if(cleanup.size() < minimumQueueSize)
             return false;
-        
+
+        log("doCleanup " + cleanup.size());
+
         synchronized(cleanup)
         {
             List<TrackedChunk> remove = new ArrayList<TrackedChunk>(cleanup);
@@ -234,7 +251,7 @@ public class ChunkManager
             pendingChanges = true;
         }
         
-        if(chunk.needsRelight())
+        if(chunk.needsRelight() && lightingEnabled)
             relightChunk(chunk);
         
         if(chunk.needsWrite())
@@ -242,21 +259,7 @@ public class ChunkManager
 
         return pendingChanges;
     }
-    
-    protected void deleteReferences(Chunk chunk)
-    {
-        cache.remove(new ChunkID(chunk.getX(), chunk.getZ()));
-        
-        int winX = chunk.getX() - windowMinX;
-        int winZ = chunk.getZ() - windowMinZ;
-        
-        if(inWindow(winX, winZ))
-        {
-            int index = winX + (winZ << windowScale);       
-            window[index] = null;
-        }
-    }
-    
+
     protected void relightChunk(TrackedChunk chunk)
     {
         int x0 = chunk.getX();
@@ -274,13 +277,19 @@ public class ChunkManager
                 if(index == 4)
                     continue;
                 
-                TrackedChunk neighbor = getChunk(x + x0 - 1, z + z0 - 1, false, false);
+                TrackedChunk neighbor = getChunk(x + x0 - 1, z + z0 - 1, false, false, false);
                 local[index] = neighbor;
             }
         }
 
         relighter.lightChunks(local);
         chunk.validateLights();
+    }
+    
+    public void closeAll()
+    {
+        unloadAll();
+        access.closeAll();
     }
 
     protected synchronized void unloadAll()
@@ -308,29 +317,19 @@ public class ChunkManager
     {        
         boolean pendingChanges = false;    
         
-        Iterator<WeakChunkReference> iter = cache.getWeakIterator();        
+        Iterator<WeakChunkReference> wter = cache.getWeakIterator();        
+        while(wter.hasNext())
+        {
+            TrackedChunk chunk = wter.next().get();
+            if(chunk != null)
+                pendingChanges |= flushChanges(chunk);
+        }
+        
+        Iterator<TrackedChunk> iter = cache.getChunkIterator();         
         while(iter.hasNext())
-        {
-            TrackedChunk chunk = iter.next().get();
-            if(chunk != null)
-                pendingChanges |= flushChanges(chunk);
-        }
-        
-        Iterator<ChunkReference> witer = cache.getSoftIterator();         
-        while(witer.hasNext())
-        {
-            TrackedChunk chunk = witer.next().get();
-            if(chunk != null)
-                pendingChanges |= flushChanges(chunk);
-        }
-        
+            pendingChanges |= flushChanges(iter.next());
+
         return pendingChanges;
-    }
-    
-    public void closeAll()
-    {
-        unloadAll();
-        access.closeAll();
     }
 
     @Override
@@ -409,125 +408,6 @@ public class ChunkManager
     protected final void log(String str)
     {
         System.out.println(str);
-    }
-}
-
-final class ChunkID extends Coordinate2D
-{
-    public ChunkID(int x, int z)
-    {
-        super(x, z);
-    }
-}
-
-@SuppressWarnings("serial")
-class ChunkCache extends LinkedHashMap<ChunkID, ChunkReference>
-{
-    ChunkManager manager;
-    HashMap<ChunkID, WeakChunkReference> weak;
-    
-    int capacity;
-
-    public ChunkCache(ChunkManager manager, int capacity)
-    {
-        this.manager = manager;
-        this.capacity = capacity;
-        this.weak = new HashMap<ChunkID, WeakChunkReference>();
-    }
-    
-    @Override
-    public ChunkReference get(Object key)
-    {
-        ChunkReference ref = super.get(key);
-        
-        if(ref == null)
-            ref = checkWeakReferences((ChunkID)key);
-        
-        return ref;
-    }
-
-    protected ChunkReference checkWeakReferences(ChunkID key)
-    {
-        WeakChunkReference wref = weak.remove(key);
-        if(wref == null)
-            return null;
-                        
-        TrackedChunk chunk = wref.get();                
-        if(chunk == null)
-            return null;
-        
-        // promote to soft reference
-        ChunkReference ref = new ChunkReference(chunk);                
-        put(key, ref);
-        
-        return ref;
-    }
-    
-    @Override
-    public void clear()
-    {
-        for(Entry<ChunkID, ChunkReference> entry : entrySet())
-        {
-            TrackedChunk chunk = entry.getValue().get();                
-            if(chunk != null)
-                weak.put(entry.getKey(), new WeakChunkReference(chunk));
-        }
-        
-        cleanupWeakReferences();            
-        super.clear();
-    }
-    
-    protected void cleanupWeakReferences()
-    {
-        Iterator<WeakChunkReference> iter = weak.values().iterator();
-        while(iter.hasNext())
-            if(iter.next().get() == null)
-                iter.remove();
-    }
-
-    protected Iterator<ChunkReference> getSoftIterator()
-    {
-        return new ArrayList<ChunkReference>(values()).iterator(); 
-    }        
-
-    protected Iterator<WeakChunkReference> getWeakIterator()
-    {
-        return new ArrayList<WeakChunkReference>(weak.values()).iterator(); 
-    }   
-    
-    @Override
-    protected boolean removeEldestEntry(Entry<ChunkID, ChunkReference> eldest)
-    {
-        if(size() > capacity)
-        {
-            TrackedChunk chunk = eldest.getValue().get();
-            
-            if(chunk != null)
-            {
-                weak.put(eldest.getKey(), new WeakChunkReference(chunk));
-                manager.requestCleanup(chunk);
-            }
-            
-            return true;
-        }
-        
-        return false;            
-    }
-}
-
-final class ChunkReference extends SoftReference<TrackedChunk>
-{
-    public ChunkReference(TrackedChunk chunk)
-    {
-        super(chunk);
-    }
-}
-
-final class WeakChunkReference extends WeakReference<TrackedChunk>
-{
-    public WeakChunkReference(TrackedChunk chunk)
-    {
-        super(chunk);
     }
 }
 

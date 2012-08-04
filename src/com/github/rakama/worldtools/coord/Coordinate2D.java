@@ -60,7 +60,10 @@ public class Coordinate2D implements Comparable<Coordinate2D>
 
     public boolean equals(Object o)
     {
-        return equals((Coordinate2D) o);
+        if(o == null)
+            return false;
+        else
+            return equals((Coordinate2D) o);
     }
 
     public boolean equals(Coordinate2D c)

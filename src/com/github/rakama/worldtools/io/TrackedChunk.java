@@ -27,6 +27,7 @@ import com.mojang.nbt.ListTag;
 class TrackedChunk extends Chunk
 {
     private ChunkManager manager;
+    private ChunkID id;
     private boolean needsWrite, needsRelight, needsNeighborNotify;
 
     public TrackedChunk(int x, int z, ChunkManager manager)
@@ -36,6 +37,7 @@ class TrackedChunk extends Chunk
         this.needsWrite = false;
         this.needsRelight = false;
         this.needsNeighborNotify = false;
+        this.id = new ChunkID(x, z);
     }
     
     public TrackedChunk(int x, int z, int[] heightmap, byte[] biomes, ChunkManager manager)
@@ -45,6 +47,7 @@ class TrackedChunk extends Chunk
         this.needsWrite = false;
         this.needsRelight = false;
         this.needsNeighborNotify = false;
+        this.id = new ChunkID(x, z);
     }
 
     public boolean isDirty()
@@ -163,10 +166,16 @@ class TrackedChunk extends Chunk
         super.clearSkyLights();
     }
 
+    protected ChunkID getID()
+    {
+        return id;
+    }
+    
     @Override
     protected void finalize() throws Throwable
     {
-        manager.requestCleanup(this);
+        if(isDirty())
+            manager.requestCleanup(this);
     }
     
     public static TrackedChunk loadChunk(CompoundTag tag, ChunkManager manager)
