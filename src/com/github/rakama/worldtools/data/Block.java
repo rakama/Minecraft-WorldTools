@@ -1,9 +1,9 @@
 package com.github.rakama.worldtools.data;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 /**
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
@@ -70,7 +70,7 @@ public final class Block implements Comparable<Block>
         
         try
         {      
-            loadMaterials(list, new File(materials_file));
+            loadMaterials(list, Block.class.getResource("csv/materials.csv"));
         }
         catch(Exception e)
         {
@@ -82,9 +82,9 @@ public final class Block implements Comparable<Block>
         return list;
     }
 
-    protected static Block[] loadMaterials(Block[] list, File file) throws IOException
+    protected static Block[] loadMaterials(Block[] list, URL url) throws IOException
     {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
         reader.readLine(); // labels
         String line = reader.readLine();
         int count = 2;

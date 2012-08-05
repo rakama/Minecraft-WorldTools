@@ -25,14 +25,14 @@ import com.github.rakama.worldtools.data.Block;
 
 public class Mandelbrot
 {
-    static String directory = "C:/Users/My Computer/AppData/Roaming/.minecraft/saves/test17";
+    static String directory = "C:/Users/My Computer/AppData/Roaming/.minecraft/saves/mandelbrot";
     
     public static void main(String[] args) throws IOException
     {
         WorldTools tools = WorldTools.getInstance(new File(directory));
         BlockCanvas canvas = tools.createCanvas();
         renderMandelbrot(canvas, 512, 128, 4);
-        tools.closeAll();    
+        tools.closeAll();
     }
     
     public static void renderMandelbrot(BlockCanvas canvas, int size, int maxY, int samples)

@@ -216,14 +216,14 @@ public class ChunkAccess
         regionManager.closeAll();
     }
 
+    protected final void log(String str)
+    {
+        System.out.println(str);
+    }
+
     @Override
     protected void finalize()
     {
         closeAll();
-    }
-
-    protected final void log(String str)
-    {
-        System.out.println(str);
     }
 }

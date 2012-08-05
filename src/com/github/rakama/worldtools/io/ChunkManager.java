@@ -82,9 +82,7 @@ public class ChunkManager
     
     public Chunk getChunk(int x, int z)
     {
-        Chunk chunk = getChunk(x, z, priority_access, true, false);
-        doCleanup(minimum_cleanup_size);
-        return chunk;
+        return getChunk(x, z, false);
     }
     
     public Chunk getChunk(int x, int z, boolean create)
@@ -223,7 +221,7 @@ public class ChunkManager
         }
     }
     
-    protected void doCleanup(int minimumQueueSize)
+    private void doCleanup(int minimumQueueSize)
     {
         if(cleanup.size() < minimumQueueSize)
             return;
@@ -238,7 +236,7 @@ public class ChunkManager
         }
     }
 
-    protected boolean flushChanges(TrackedChunk chunk)
+    private boolean flushChanges(TrackedChunk chunk)
     {
         if(debug)
             log("FLUSH_CHANGES " + chunk.getX() + " " + chunk.getZ());
@@ -260,7 +258,7 @@ public class ChunkManager
         return pendingChanges;
     }
 
-    protected void relightChunk(TrackedChunk chunk)
+    private void relightChunk(TrackedChunk chunk)
     {
         int x0 = chunk.getX();
         int z0 = chunk.getZ();
@@ -291,7 +289,7 @@ public class ChunkManager
         access.closeAll();
     }
 
-    protected synchronized void unloadAll()
+    private synchronized void unloadAll()
     {        
         if(debug)
             log("UNLOADING_CACHE *");
@@ -401,7 +399,7 @@ public class ChunkManager
     @Override
     protected void finalize() throws Exception
     {
-        unloadAll();
+        closeAll();
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
     }
     

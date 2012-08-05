@@ -183,6 +183,9 @@ public class PriorityCache<K, V>
 
     public Collection<WeakReference<V>> getWeakReferences()
     {
+        if(weak == null)
+            return null;
+        
         return Collections.unmodifiableCollection(weak.values());
     }
     

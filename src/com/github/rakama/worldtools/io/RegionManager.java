@@ -81,23 +81,15 @@ class RegionManager
         return cache.values();
     }
     
-    protected void forceLoad(RegionInfo info)
+    private void forceLoad(RegionInfo info)
     {
         if(!info.isCached())
             load(info);
             
         cache.put(info.getID(), info);
     }
-
-    protected void forceUnload(RegionInfo info)
-    {         
-        if(info != null)
-            unload(info);   
-        
-        cache.remove(info.getID());  
-    }
     
-    protected void forceRefresh(RegionInfo info)
+    private void forceRefresh(RegionInfo info)
     {
         cache.remove(info.getID());         
         cache.put(info.getID(), info);
@@ -133,7 +125,7 @@ class RegionManager
         }        
     }
 
-    protected void unloadCache()
+    private void unloadCache()
     {
         if(debug)
             log("UNLOAD_REGION *");
@@ -150,6 +142,11 @@ class RegionManager
     public void closeAll()
     {
         unloadCache();
+    }
+
+    protected final void log(String str)
+    {
+        System.out.println(str);
     }
 
     @Override
@@ -179,10 +176,5 @@ class RegionManager
             
             return false;
         }
-    }
-
-    protected final void log(String str)
-    {
-        System.out.println(str);
     }
 }
