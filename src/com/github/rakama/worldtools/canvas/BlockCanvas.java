@@ -1,5 +1,6 @@
 package com.github.rakama.worldtools.canvas;
 
+import com.github.rakama.worldtools.data.Biome;
 import com.github.rakama.worldtools.data.Block;
 import com.github.rakama.worldtools.data.Chunk;
 import com.github.rakama.worldtools.io.ChunkManager;
@@ -94,6 +95,12 @@ public class BlockCanvas
         chunk.setBiome(x & 0xF, z & 0xF, biome);
     }
 
+    public void setBiome(int x, int z, Biome biome)
+    {
+        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
+        chunk.setBiome(x & 0xF, z & 0xF, biome);
+    }
+    
     public int getBiome(int x, int z)
     {
         Chunk chunk = manager.getChunk(x >> 4, z >> 4);

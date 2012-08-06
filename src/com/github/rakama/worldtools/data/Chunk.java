@@ -80,6 +80,12 @@ public class Chunk
         checkBounds(x, z);
         biomes[x + (z << 4)] = (byte)val;
     }
+
+    public void setBiome(int x, int z, Biome biome)
+    {
+        checkBounds(x, z);
+        biomes[x + (z << 4)] = (byte)biome.getID();
+    }
     
     public int getHeight(int x, int z)
     {
