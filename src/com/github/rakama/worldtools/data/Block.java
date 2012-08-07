@@ -42,6 +42,7 @@ public final class Block implements Comparable<Block>
     public final static Block LEAVES = getBlock(18, 4);
     public final static Block GLASS = getBlock(20);
     public final static Block SANDSTONE = getBlock(24);
+    public final static Block SHRUB = getBlock(32);
     public final static Block WOOL = getBlock(35);
     public final static Block BRICKS = getBlock(45);
     public final static Block OBSIDIAN = getBlock(49);

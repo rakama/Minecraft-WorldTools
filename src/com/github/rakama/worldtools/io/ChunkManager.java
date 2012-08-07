@@ -30,7 +30,7 @@ import com.github.rakama.worldtools.util.PriorityCache;
 
 public class ChunkManager
 {
-    protected final static int default_max_cache_size = 2048;
+    protected final static int default_max_cache_size = 1024;
     protected final static int default_window_scale = 2;
     protected final static int minimum_cleanup_size = 32;
     protected final static int priority_access = 10000;
