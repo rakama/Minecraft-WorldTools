@@ -1,15 +1,4 @@
-package com.github.rakama.worldtools.util;
-
-import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -24,6 +13,17 @@ import java.util.Queue;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.util;
+
+import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class PriorityCache<K, V>
 {

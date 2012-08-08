@@ -1,11 +1,4 @@
-package com.github.rakama.worldtools.canvas;
-
-import com.github.rakama.worldtools.data.Biome;
-import com.github.rakama.worldtools.data.Block;
-import com.github.rakama.worldtools.data.Chunk;
-import com.github.rakama.worldtools.io.ChunkManager;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -20,6 +13,13 @@ import com.github.rakama.worldtools.io.ChunkManager;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.canvas;
+
+import com.github.rakama.worldtools.data.Biome;
+import com.github.rakama.worldtools.data.Block;
+import com.github.rakama.worldtools.data.Chunk;
+import com.github.rakama.worldtools.io.ChunkManager;
 
 public class BlockCanvas
 {    

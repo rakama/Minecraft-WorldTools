@@ -1,15 +1,4 @@
-package com.github.rakama.worldtools.io;
-
-import com.github.rakama.worldtools.coord.Coordinate2D;
-import com.github.rakama.worldtools.data.Block;
-import com.github.rakama.worldtools.data.Chunk;
-import com.mojang.nbt.ByteArrayTag;
-import com.mojang.nbt.CompoundTag;
-import com.mojang.nbt.IntArrayTag;
-import com.mojang.nbt.IntTag;
-import com.mojang.nbt.ListTag;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -24,6 +13,17 @@ import com.mojang.nbt.ListTag;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.io;
+
+import com.github.rakama.worldtools.coord.Coordinate2D;
+import com.github.rakama.worldtools.data.Block;
+import com.github.rakama.worldtools.data.Chunk;
+import com.mojang.nbt.ByteArrayTag;
+import com.mojang.nbt.CompoundTag;
+import com.mojang.nbt.IntArrayTag;
+import com.mojang.nbt.IntTag;
+import com.mojang.nbt.ListTag;
 
 class TrackedChunk extends Chunk
 {

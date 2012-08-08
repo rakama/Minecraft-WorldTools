@@ -1,13 +1,4 @@
-package com.github.rakama.worldtools.io;
-
-import java.io.File;
-
-import net.minecraft.world.level.chunk.storage.RegionFile;
-
-import com.github.rakama.worldtools.coord.BoundingBox;
-import com.github.rakama.worldtools.coord.Coordinate2D;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -22,6 +13,15 @@ import com.github.rakama.worldtools.coord.Coordinate2D;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.io;
+
+import java.io.File;
+
+import net.minecraft.world.level.chunk.storage.RegionFile;
+
+import com.github.rakama.worldtools.coord.BoundingBox;
+import com.github.rakama.worldtools.coord.Coordinate2D;
 
 public class RegionInfo
 {

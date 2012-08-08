@@ -1,6 +1,4 @@
-package com.github.rakama.worldtools.coord;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -15,6 +13,8 @@ package com.github.rakama.worldtools.coord;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.coord;
 
 public class Coordinate2D implements Comparable<Coordinate2D>
 {

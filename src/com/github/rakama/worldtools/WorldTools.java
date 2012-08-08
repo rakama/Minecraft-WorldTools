@@ -1,15 +1,4 @@
-package com.github.rakama.worldtools;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import com.github.rakama.worldtools.canvas.BlockCanvas;
-import com.github.rakama.worldtools.io.ChunkAccess;
-import com.github.rakama.worldtools.io.ChunkManager;
-import com.github.rakama.worldtools.light.WorldRelighter;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -24,6 +13,17 @@ import com.github.rakama.worldtools.light.WorldRelighter;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import com.github.rakama.worldtools.canvas.BlockCanvas;
+import com.github.rakama.worldtools.io.ChunkAccess;
+import com.github.rakama.worldtools.io.ChunkManager;
+import com.github.rakama.worldtools.light.WorldRelighter;
 
 public class WorldTools
 {    

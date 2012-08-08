@@ -1,11 +1,4 @@
-package com.github.rakama.worldtools.data;
-
-import com.github.rakama.worldtools.util.NibbleArray;
-import com.mojang.nbt.ByteArrayTag;
-import com.mojang.nbt.ByteTag;
-import com.mojang.nbt.CompoundTag;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -20,6 +13,13 @@ import com.mojang.nbt.CompoundTag;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.data;
+
+import com.github.rakama.worldtools.util.NibbleArray;
+import com.mojang.nbt.ByteArrayTag;
+import com.mojang.nbt.ByteTag;
+import com.mojang.nbt.CompoundTag;
 
 public class Section
 {

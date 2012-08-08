@@ -1,8 +1,4 @@
-package com.github.rakama.worldtools.data;
-
-import java.io.File;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -17,6 +13,10 @@ import java.io.File;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.data;
+
+import java.io.File;
 
 public class LevelData
 {

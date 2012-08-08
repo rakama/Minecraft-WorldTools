@@ -1,10 +1,4 @@
-package com.github.rakama.worldtools.light;
-
-import com.github.rakama.worldtools.data.Chunk;
-import com.github.rakama.worldtools.light.LightCache.Mode;
-import com.github.rakama.worldtools.util.CircularBuffer;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -19,6 +13,12 @@ import com.github.rakama.worldtools.util.CircularBuffer;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.light;
+
+import com.github.rakama.worldtools.data.Chunk;
+import com.github.rakama.worldtools.light.LightCache.Mode;
+import com.github.rakama.worldtools.util.CircularBuffer;
 
 public class ChunkRelighter
 {
@@ -104,7 +104,7 @@ public class ChunkRelighter
         if(isImmutable(x, z))
             chunk = getProtector(x, z, chunk);
 
-        chunk.trimSections();
+        chunk.trimSections();        
         chunk.recomputeHeightmap();                  
             
         cache.setChunk(x, z, chunk);   

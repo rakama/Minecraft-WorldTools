@@ -1,9 +1,4 @@
-package com.github.rakama.worldtools.util;
-
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -18,6 +13,11 @@ import java.nio.BufferUnderflowException;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.util;
+
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 public class CircularBuffer
 {

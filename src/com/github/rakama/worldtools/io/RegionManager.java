@@ -1,16 +1,4 @@
-package com.github.rakama.worldtools.io;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import net.minecraft.world.level.chunk.storage.RegionFile;
-
-/**
+/*
  * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -25,6 +13,18 @@ import net.minecraft.world.level.chunk.storage.RegionFile;
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+package com.github.rakama.worldtools.io;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import net.minecraft.world.level.chunk.storage.RegionFile;
 
 class RegionManager 
 {
