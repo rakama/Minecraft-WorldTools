@@ -33,10 +33,10 @@ public class Chunk
     public final static int area = width * length;
     public final static int volume = width * length * height;
 
-    public final static int default_blockid = Section.default_blockid;
-    public final static int default_metadata = Section.default_metadata;
-    public final static int default_skylight = Section.default_skylight;
-    public final static int default_blocklight = Section.default_blocklight;
+    protected final static int default_blockid = Section.default_blockid;
+    protected final static int default_metadata = Section.default_metadata;
+    protected final static int default_skylight = Section.default_skylight;
+    protected final static int default_blocklight = Section.default_blocklight;
 
     protected int x, z;
     protected Section[] sections;
@@ -47,11 +47,14 @@ public class Chunk
 
     public Chunk(int x, int z)
     {
-        this(x, z, new int[width * length], new byte[width * length]);
+        this(x, z, new int[area], new byte[area]);
     }
 
     public Chunk(int x, int z, int[] heightmap, byte[] biomes)
     {
+        if(heightmap.length != area || biomes.length != area)
+            throw new IllegalArgumentException("Expected array of size " + area);
+        
         this.sections = new Section[num_sections];
         this.heightmap = heightmap;
         this.biomes = biomes;

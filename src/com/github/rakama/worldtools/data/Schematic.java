@@ -1,0 +1,220 @@
+/*
+ * Copyright (c) 2012, RamsesA <ramsesakama@gmail.com>
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+
+package com.github.rakama.worldtools.data;
+
+import java.io.File;
+import java.io.IOException;
+
+import com.github.rakama.worldtools.canvas.BlockCanvas;
+import com.mojang.nbt.ByteArrayTag;
+import com.mojang.nbt.CompoundTag;
+import com.mojang.nbt.ListTag;
+import com.mojang.nbt.NbtIo;
+import com.mojang.nbt.ShortTag;
+import com.mojang.nbt.StringTag;
+
+public class Schematic implements BlockCanvas
+{
+    protected final int width, height, length;
+    protected final byte[] blockid;
+    protected final byte[] metadata;
+    protected CompoundTag tag;
+    
+    public Schematic(int width, int height, int length)
+    {
+        this.width = width;
+        this.height = height;
+        this.length = length;
+        this.blockid = new byte[width*height*length];
+        this.metadata = new byte[width*height*length];
+    }
+    
+    protected Schematic(int width, int height, int length, byte[] blockid, byte[] metadata)
+    {
+        this.width = width;
+        this.height = height;
+        this.length = length;
+        this.blockid = blockid;
+        this.metadata = metadata;
+    }
+
+    protected Schematic(CompoundTag tag)
+    {
+        this.tag = tag;
+        this.width = ((ShortTag)tag.get("Width")).data;
+        this.height = ((ShortTag)tag.get("Height")).data;
+        this.length = ((ShortTag)tag.get("Length")).data;
+        this.blockid = ((ByteArrayTag)tag.get("Blocks")).data;
+        this.metadata = ((ByteArrayTag)tag.get("Data")).data;
+    }
+    
+    public int getWidth()
+    {
+        return width;
+    }
+
+    public int getHeight()
+    {
+        return height;
+    }
+
+    public int getLength()
+    {
+        return length;
+    }
+
+    public void setBlock(int x, int y, int z, Block block)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        blockid[index] = (byte)block.getID();
+        metadata[index] = (byte)block.getMetadata();
+    }
+    
+    public void setBlock(int x, int y, int z, int id, int data)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        blockid[index] = (byte)id;
+        metadata[index] = (byte)data;
+    }
+    
+    public void setBlockID(int x, int y, int z, int id)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        blockid[index] = (byte)id;
+    }
+    
+    public void setMetaData(int x, int y, int z, int data)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        metadata[index] = (byte)data;
+    }
+    
+    public Block getBlock(int x, int y, int z)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        int data = metadata[index];
+        int id = blockid[index];
+        return Block.getBlock(id, data);
+    }
+    
+    public int getBlockID(int x, int y, int z)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        return blockid[index];
+    }
+    
+    public int getMetaData(int x, int y, int z)
+    {
+        checkBounds(x, y, z);
+        int index = toIndex(x, y, z);
+        return metadata[index];
+    }
+    
+    public void setBiome(int x, int z, int biome)
+    {
+        checkBounds(x, 0, z);        
+        // do nothing
+    }
+    
+    public void setBiome(int x, int z, Biome biome)
+    {
+        checkBounds(x, 0, z);
+        // do nothing
+    }
+    
+    public int getBiome(int x, int z)
+    {
+        checkBounds(x, 0, z);
+        return -1;
+    }
+    
+    public int getHeight(int x, int z)
+    {
+        checkBounds(x, 0, z);
+        return -1;
+    }    
+    
+    public CompoundTag getTag()
+    {
+        if(tag == null)
+            tag = new CompoundTag("Schematic");
+
+        ShortTag tagW = new ShortTag("Width", (short)width);
+        ShortTag tagH = new ShortTag("Height", (short)height);
+        ShortTag tagL = new ShortTag("Length", (short)length);
+        StringTag tagMat = new StringTag("Materials", "Alpha");
+        ByteArrayTag tagBlockid = new ByteArrayTag("Blocks", blockid);
+        ByteArrayTag tagMetadata = new ByteArrayTag("Data", metadata);
+
+        tag.put("Width", tagW);
+        tag.put("Height", tagH);
+        tag.put("Length", tagL);
+        tag.put("Materials", tagMat);
+        tag.put("Blocks", tagBlockid);
+        tag.put("Data", tagMetadata);
+        tag.put("Entities", new ListTag<CompoundTag>("Entities"));
+        tag.put("TileEntities", new ListTag<CompoundTag>("TileEntities"));
+
+        return tag;
+    }
+    
+    protected void checkBounds(int x, int y, int z)
+    {
+        if(!inBounds(x, y, z))
+            throw new IndexOutOfBoundsException("(" + x + ", " + y + ", " + z + ")");
+    }
+
+    protected boolean inBounds(int x, int y, int z)
+    {
+        return x >= 0 && x < width 
+            && y >= 0 && y < height 
+            && z >= 0 && z < length;
+    }
+
+    protected int toIndex(int x, int y, int z)
+    {
+        return x + (z * width) + (y * length * width);
+    }
+
+    public static Schematic loadSchematic(CompoundTag tag) throws IOException
+    {        
+        try
+        {
+            return new Schematic(tag);
+        }
+        catch(Exception e)
+        {
+            throw new IOException(e);
+        }
+    }
+    
+    public static Schematic loadSchematic(File file) throws IOException
+    {
+        return loadSchematic(NbtIo.read(file));
+    }
+    
+    public static void saveSchematic(Schematic schema, File file) throws IOException
+    {
+        NbtIo.write(schema.getTag(), file);
+    }
+}

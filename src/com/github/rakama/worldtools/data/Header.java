@@ -18,7 +18,7 @@ package com.github.rakama.worldtools.data;
 
 import java.io.File;
 
-public class LevelData
+public class Header
 {
     protected File file;
 }

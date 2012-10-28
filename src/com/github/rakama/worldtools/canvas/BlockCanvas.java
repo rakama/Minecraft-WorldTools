@@ -18,101 +18,18 @@ package com.github.rakama.worldtools.canvas;
 
 import com.github.rakama.worldtools.data.Biome;
 import com.github.rakama.worldtools.data.Block;
-import com.github.rakama.worldtools.data.Chunk;
-import com.github.rakama.worldtools.io.ChunkManager;
 
-public class BlockCanvas
+public interface BlockCanvas
 {    
-    protected final ChunkManager manager;
-    
-    protected BlockCanvas(ChunkManager manager)
-    {
-        this.manager = manager;
-    }
-    
-    public static BlockCanvas createCanvas(ChunkManager manager)
-    {
-        return new BlockCanvas(manager);
-    }
-
-    public void setBlock(int x, int y, int z, Block block)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);        
-        chunk.setBlock(x & 0xF, y, z & 0xF, block);
-    }
-
-    public void setBlock(int x, int y, int z, int id, int data)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);        
-        chunk.setBlock(x & 0xF, y, z & 0xF, Block.getBlock(id, data));
-    }
-    
-    public void setBlockID(int x, int y, int z, int id)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);        
-        chunk.setBlockID(x & 0xF, y, z & 0xF, id);
-    }
-
-    public void setMetaData(int x, int y, int z, int data)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);        
-        chunk.setMetaData(x & 0xF, y, z & 0xF, data);
-    }
-    
-    public Block getBlock(int x, int y, int z)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4);
-
-        if(chunk == null)
-            return null;
-        else
-            return chunk.getBlock(x & 0xF, y, z & 0xF);
-    }
-    
-    public int getBlockID(int x, int y, int z)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4);    
-
-        if(chunk == null)
-            return -1;
-        else
-            return chunk.getBlockID(x & 0xF, y, z & 0xF);
-    }
-
-    public int getMetaData(int x, int y, int z)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4);
-        
-        if(chunk == null)
-            return -1;
-        else
-            return chunk.getMetaData(x & 0xF, y, z & 0xF);
-    }
-
-    public void setBiome(int x, int z, int biome)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
-        chunk.setBiome(x & 0xF, z & 0xF, biome);
-    }
-
-    public void setBiome(int x, int z, Biome biome)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
-        chunk.setBiome(x & 0xF, z & 0xF, biome);
-    }
-    
-    public int getBiome(int x, int z)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4);
-
-        if(chunk == null)
-            return -1;
-        else
-            return chunk.getBiome(x & 0xF, z & 0xF);
-    }
-
-    public void closeAll()
-    {
-        manager.closeAll();
-    }
+    public void setBlock(int x, int y, int z, Block block);
+    public void setBlock(int x, int y, int z, int id, int data);    
+    public void setBlockID(int x, int y, int z, int id);
+    public void setMetaData(int x, int y, int z, int data);    
+    public Block getBlock(int x, int y, int z);    
+    public int getBlockID(int x, int y, int z);
+    public int getMetaData(int x, int y, int z);
+    public void setBiome(int x, int z, int biome);
+    public void setBiome(int x, int z, Biome biome);    
+    public int getBiome(int x, int z);
+    public int getHeight(int x, int z);
 }

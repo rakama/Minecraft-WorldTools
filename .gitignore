@@ -167,6 +167,7 @@ pip-log.txt
 ## Custom
 #############
 
+out/
 doc/
 junk/
 src/test/

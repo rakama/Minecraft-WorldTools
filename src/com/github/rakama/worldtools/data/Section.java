@@ -26,12 +26,13 @@ public class Section
     public final static int width = 16;
     public final static int length = 16;
     public final static int height = 16;
+    public final static int area = width * length;
     public final static int volume = width * length * height;
 
-    public final static int default_blockid = 0;
-    public final static int default_metadata = 0;
-    public final static int default_skylight = 15;
-    public final static int default_blocklight = 15;
+    protected final static int default_blockid = 0;
+    protected final static int default_metadata = 0;
+    protected final static int default_skylight = 15;
+    protected final static int default_blocklight = 15;
 
     protected final int y;
     protected final byte[] blockid;
@@ -52,7 +53,7 @@ public class Section
     public Section(int y, byte[] blockid, NibbleArray metadata, NibbleArray blocklight, NibbleArray skylight)
     {
         if(blockid.length != volume || metadata.size() != volume || blocklight.size() != volume || skylight.size() != volume)
-            throw new IllegalArgumentException("expected array of size " + volume);
+            throw new IllegalArgumentException("Expected array of size " + volume);
 
         this.y = y;
         this.blockid = blockid;

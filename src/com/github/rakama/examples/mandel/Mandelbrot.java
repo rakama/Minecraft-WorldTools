@@ -14,11 +14,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.github.rakama.examples;
+package com.github.rakama.examples.mandel;
 
 import java.io.File;
 import java.io.IOException;
 
+import com.github.rakama.worldtools.WorldManager;
 import com.github.rakama.worldtools.WorldTools;
 import com.github.rakama.worldtools.canvas.BlockCanvas;
 import com.github.rakama.worldtools.data.Block;
@@ -29,10 +30,10 @@ public class Mandelbrot
     
     public static void main(String[] args) throws IOException
     {
-        WorldTools tools = WorldTools.getInstance(new File(directory));
-        BlockCanvas canvas = tools.createCanvas();
+        WorldManager manager = WorldTools.getWorldManager(new File(directory));
+        BlockCanvas canvas = manager.getCanvas();
         renderMandelbrot(canvas, 512, 128, 4);
-        tools.closeAll();
+        manager.closeAll();
     }
     
     public static void renderMandelbrot(BlockCanvas canvas, int size, int maxY, int samples)

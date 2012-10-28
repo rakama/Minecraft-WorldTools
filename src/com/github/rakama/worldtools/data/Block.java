@@ -23,9 +23,8 @@ import java.net.URL;
 
 public final class Block implements Comparable<Block>
 {
-    final static String materials_file = "materials.csv";
-    
-    final static Block[] list = initializeMaterials();
+    protected static String materials_file = "csv/materials.csv";    
+    protected static Block[] list = initializeMaterials();
 
     public final static Block AIR = getBlock(0);
     public final static Block STONE = getBlock(1);
@@ -51,16 +50,16 @@ public final class Block implements Comparable<Block>
     public final static Block CLAY = getBlock(82);
     public final static Block MYCELIUM = getBlock(110);
     
-    protected final int id, data;
-    protected final boolean transparent, shady;
-    protected final int diffusion, luminance;
+    protected int id, data;
+    protected boolean transparent, shade;
+    protected int diffusion, luminance;
     
     protected Block(int id, int data, boolean trs, boolean shd, int dif, int lum)
     {
         this.id = id;
         this.data = data;
         this.transparent = trs;
-        this.shady = shd;
+        this.shade = shd;
         this.diffusion = dif;
         this.luminance = lum;
     }
@@ -71,19 +70,17 @@ public final class Block implements Comparable<Block>
         
         try
         {      
-            loadMaterials(list, Block.class.getResource("csv/materials.csv"));
+            loadMaterials(list, Block.class.getResource(materials_file));
         }
         catch(Exception e)
         {
-            System.err.println("WorldTools encountered an error while initializing!");
-            e.printStackTrace();
-            System.exit(0);
+            throw new RuntimeException("WorldTools encountered an error while initializing!", e);
         }
 
         return list;
     }
 
-    protected static Block[] loadMaterials(Block[] list, URL url) throws IOException
+    protected static void loadMaterials(Block[] list, URL url) throws IOException
     {
         BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
         reader.readLine(); // labels
@@ -95,8 +92,6 @@ public final class Block implements Comparable<Block>
             line = reader.readLine();
             count++;
         }
-        
-        return list;
     }
 
     protected static void loadEntry(int count, Block[] list, String... vals)
@@ -120,6 +115,24 @@ public final class Block implements Comparable<Block>
             System.err.println("Found improperly formatted material! (line " + count + ")");            
             System.err.println(e);
         }
+    }
+
+    public static Block getBlock(String str)
+    {
+        if(str.isEmpty())
+            return null;
+        
+        String[] split = str.trim().split(":");
+        
+        int id = Integer.parseInt(split[0]);
+        
+        if(split.length > 1)
+        {
+            int data = Integer.parseInt(split[1]);
+            return getBlock(id, data);
+        }
+        else
+            return getBlock(id);
     }
     
     public static Block getBlock(int id)
@@ -160,7 +173,7 @@ public final class Block implements Comparable<Block>
 
     public boolean isShady()
     {
-        return shady;
+        return shade;
     }
     
     public int getLightDiffusion()

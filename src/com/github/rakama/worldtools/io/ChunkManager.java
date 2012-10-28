@@ -39,10 +39,10 @@ public class ChunkManager
     protected final boolean debug = false;
     
     private final ChunkAccess access;
-    private final TrackedChunk[] window;
+    private final ManagedChunk[] window;
     private final ChunkCache cache;
     private final ChunkRelighter relighter;
-    private final List<TrackedChunk> cleanup;
+    private final List<ManagedChunk> cleanup;
     
     private final int windowSize, windowScale, windowMask;
     private int windowMinX, windowMinZ, reads, writes;
@@ -60,10 +60,10 @@ public class ChunkManager
         this.windowScale = windowScale;
         this.windowSize = 1 << windowScale;
         this.windowMask = bitmask(windowScale);
-        this.window = new TrackedChunk[windowSize * windowSize];
+        this.window = new ManagedChunk[windowSize * windowSize];
         this.cache = new ChunkCache(cacheSize);
         this.relighter = new ChunkRelighter();
-        this.cleanup = new LinkedList<TrackedChunk>();
+        this.cleanup = new LinkedList<ManagedChunk>();
         this.lightingEnabled = true;
         
         shutdownHook = new CloseOpenChunks(this);
@@ -75,7 +75,7 @@ public class ChunkManager
         lightingEnabled = enabled;
     }
     
-    public boolean isLightingEnabled()
+    public boolean getLightingEnabled()
     {
         return lightingEnabled;
     }
@@ -92,10 +92,9 @@ public class ChunkManager
         return chunk;
     }
     
-    protected TrackedChunk getChunk(int x, int z, int priority, boolean moveWindow, boolean create)
+    protected ManagedChunk getChunk(int x, int z, int priority, boolean moveWindow, boolean create)
     {      
-        // try window
-        
+        // try window        
         int winX = x - windowMinX;
         int winZ = z - windowMinZ;
         int winIndex;
@@ -103,7 +102,7 @@ public class ChunkManager
         if(inWindow(winX, winZ))
         {
             winIndex = winX + (winZ << windowScale);       
-            TrackedChunk chunk = window[winIndex];       
+            ManagedChunk chunk = window[winIndex];       
             if(chunk != null)
                 return chunk;
         }
@@ -121,9 +120,8 @@ public class ChunkManager
             log("WINDOW_MISS " + x + " " + z);
         
         // try soft cache
-
         cache.decay(1);        
-        TrackedChunk chunk = cache.get(x, z, priority);
+        ManagedChunk chunk = cache.get(x, z, priority);
         
         if(chunk != null)
         {
@@ -137,8 +135,7 @@ public class ChunkManager
         if(debug)
             log("CACHE_MISS " + x + " " + z);
         
-        // try chunk access
-        
+        // try chunk access        
         chunk = readChunk(x, z);
         
         if(chunk == null)
@@ -149,7 +146,7 @@ public class ChunkManager
             if(debug)
                 log("NEW_CHUNK " + x + " " + z);
           
-            chunk = new TrackedChunk(x, z, this);
+            chunk = new ManagedChunk(x, z, this);
             chunk.invalidateFile();
         }
         
@@ -176,12 +173,12 @@ public class ChunkManager
     
     private void invalidateLights()
     {
-        for(TrackedChunk chunk : window)
+        for(ManagedChunk chunk : window)
             if(chunk != null && chunk.needsNeighborNotify())
                 notifyNeighbors(chunk);
     }
     
-    private void notifyNeighbors(TrackedChunk chunk)
+    private void notifyNeighbors(ManagedChunk chunk)
     {        
         int x = chunk.getX();
         int z = chunk.getZ();
@@ -199,7 +196,7 @@ public class ChunkManager
         chunk.validateNeighborNotify();
     }
     
-    private void notifyIfExists(TrackedChunk chunk)
+    private void notifyIfExists(ManagedChunk chunk)
     {
         if(chunk != null)
             chunk.invalidateLights();
@@ -210,7 +207,7 @@ public class ChunkManager
         return (x & windowMask) == x && (z & windowMask) == z;
     }
 
-    protected void requestCleanup(TrackedChunk chunk)
+    protected void requestCleanup(ManagedChunk chunk)
     {
         if(chunk == null)
             return;
@@ -228,15 +225,15 @@ public class ChunkManager
 
         synchronized(cleanup)
         {
-            List<TrackedChunk> remove = new ArrayList<TrackedChunk>(cleanup);
+            List<ManagedChunk> remove = new ArrayList<ManagedChunk>(cleanup);
             cleanup.clear();
             
-            for(TrackedChunk chunk : remove)
+            for(ManagedChunk chunk : remove)
                 flushChanges(chunk);
         }
     }
 
-    private boolean flushChanges(TrackedChunk chunk)
+    private boolean flushChanges(ManagedChunk chunk)
     {
         if(debug)
             log("FLUSH_CHANGES " + chunk.getX() + " " + chunk.getZ());
@@ -258,7 +255,7 @@ public class ChunkManager
         return pendingChanges;
     }
 
-    private void relightChunk(TrackedChunk chunk)
+    private void relightChunk(ManagedChunk chunk)
     {
         int x0 = chunk.getX();
         int z0 = chunk.getZ();
@@ -311,24 +308,24 @@ public class ChunkManager
     
     private void flushWeakReferences()
     {        
-        List<TrackedChunk> flush = new ArrayList<TrackedChunk>();
+        List<ManagedChunk> flush = new ArrayList<ManagedChunk>();
         
-        for(WeakReference<TrackedChunk> ref : cache.getWeakReferences())
+        for(WeakReference<ManagedChunk> ref : cache.getWeakReferences())
         {
-            TrackedChunk chunk = ref.get();
+            ManagedChunk chunk = ref.get();
             if(chunk != null)
                 flush.add(chunk);
         }
         
-        for(TrackedChunk chunk : flush)
+        for(ManagedChunk chunk : flush)
             flushChanges(chunk);
     }
 
-    private TrackedChunk readChunk(int x, int z)
+    private ManagedChunk readChunk(int x, int z)
     {
         try
         {
-            TrackedChunk chunk = access.readChunk(x, z, this);
+            ManagedChunk chunk = access.readChunk(x, z, this);
             if(chunk != null)
                 reads++;
             return chunk;
@@ -340,7 +337,7 @@ public class ChunkManager
         }
     }
 
-    private boolean writeChunk(TrackedChunk chunk)
+    private boolean writeChunk(ManagedChunk chunk)
     {
         try
         {
@@ -376,12 +373,12 @@ public class ChunkManager
         return cache.size();
     }
     
-    public int getReads()
+    public int getNumReads()
     {
         return reads;
     }
 
-    public int getWrites()
+    public int getNumWrites()
     {
         return writes;
     }
@@ -403,29 +400,29 @@ public class ChunkManager
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
     }
     
-    final class ChunkCache extends PriorityCache<ChunkID, TrackedChunk>
+    final class ChunkCache extends PriorityCache<ChunkID, ManagedChunk>
     {            
         public ChunkCache(int maxCapacity)
         {
             super(maxCapacity);
         }
 
-        public TrackedChunk get(int x, int z, int priority)
+        public ManagedChunk get(int x, int z, int priority)
         {
             return super.get(new ChunkID(x, z), priority);
         }
 
-        public void put(TrackedChunk chunk, int priority)
+        public void put(ManagedChunk chunk, int priority)
         {
             super.put(chunk.getID(), chunk, priority);
         }
             
-        public void refresh(TrackedChunk chunk, int priority)
+        public void refresh(ManagedChunk chunk, int priority)
         {
             super.refresh(chunk.getID(), priority);
         }
         
-        protected void expired(ChunkID key, TrackedChunk value)
+        protected void expired(ChunkID key, ManagedChunk value)
         {
             if(value.isDirty())
                 requestCleanup(value);

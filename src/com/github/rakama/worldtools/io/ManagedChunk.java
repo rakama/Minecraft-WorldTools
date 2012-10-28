@@ -25,13 +25,13 @@ import com.mojang.nbt.IntArrayTag;
 import com.mojang.nbt.IntTag;
 import com.mojang.nbt.ListTag;
 
-class TrackedChunk extends Chunk
+class ManagedChunk extends Chunk
 {
     private ChunkManager manager;
     private ChunkID id;
     private boolean needsWrite, needsRelight, needsNeighborNotify;
 
-    public TrackedChunk(int x, int z, ChunkManager manager)
+    public ManagedChunk(int x, int z, ChunkManager manager)
     {
         super(x, z);
         this.manager = manager;
@@ -41,7 +41,7 @@ class TrackedChunk extends Chunk
         this.id = new ChunkID(x, z);
     }
     
-    public TrackedChunk(int x, int z, int[] heightmap, byte[] biomes, ChunkManager manager)
+    public ManagedChunk(int x, int z, int[] heightmap, byte[] biomes, ChunkManager manager)
     {
         super(x, z, heightmap, biomes);
         this.manager = manager;
@@ -179,7 +179,7 @@ class TrackedChunk extends Chunk
             manager.requestCleanup(this);
     }
     
-    public static TrackedChunk loadChunk(CompoundTag tag, ChunkManager manager)
+    public static ManagedChunk loadChunk(CompoundTag tag, ChunkManager manager)
     {
         CompoundTag level = (CompoundTag) tag.get("Level");
 
@@ -190,10 +190,10 @@ class TrackedChunk extends Chunk
         IntTag xPos = (IntTag) level.get("xPos");
         IntTag zPos = (IntTag) level.get("zPos");
 
-        TrackedChunk chunk;
-        chunk = new TrackedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
+        ManagedChunk chunk;
+        chunk = new ManagedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
         
-        // TODO: create TrackedSection to catch Section changes
+        // TODO: create ManagedSection to catch Section changes
         chunk.loadSections(sections);
         chunk.tag = tag;
 
