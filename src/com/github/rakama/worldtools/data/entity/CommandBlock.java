@@ -22,18 +22,18 @@ import com.mojang.nbt.StringTag;
 
 public class CommandBlock extends TileEntity
 {
-	protected CommandBlock(CompoundTag tag)
-	{
-		super(tag);
-	}
-	
-	public String getCommand()
-	{
-		return ((StringTag)tag.get("Command")).data;
-	}
-	
-	public CommandBlock clone()
-	{
-		return new CommandBlock((CompoundTag)tag.copy());
-	}
+    protected CommandBlock(CompoundTag tag)
+    {
+        super(tag);
+    }
+    
+    public String getCommand()
+    {
+        return ((StringTag)tag.get("Command")).data;
+    }
+    
+    public CommandBlock clone()
+    {
+        return new CommandBlock((CompoundTag)tag.copy());
+    }
 }

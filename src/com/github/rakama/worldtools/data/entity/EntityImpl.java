@@ -21,13 +21,13 @@ import com.mojang.nbt.CompoundTag;
 
 class EntityImpl extends Entity
 {
-	protected EntityImpl(CompoundTag tag)
-	{
-		super(tag);
-	}
-	
-	public EntityImpl clone()
-	{
-		return new EntityImpl((CompoundTag)tag.copy());
-	}
+    protected EntityImpl(CompoundTag tag)
+    {
+        super(tag);
+    }
+    
+    public EntityImpl clone()
+    {
+        return new EntityImpl((CompoundTag)tag.copy());
+    }
 }

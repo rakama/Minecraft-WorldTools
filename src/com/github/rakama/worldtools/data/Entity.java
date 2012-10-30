@@ -25,67 +25,67 @@ import com.mojang.nbt.Tag;
 
 public abstract class Entity
 {
-	protected CompoundTag tag;
-	
-	protected Entity(CompoundTag tag)
-	{
-		this.tag = tag;
-	}
-	
-	public String getID()
-	{
-		return ((StringTag)tag.get("id")).data;
-	}
-	
-	@SuppressWarnings("unchecked")
-	protected void translate(double x, double y, double z)
-	{
-		ListTag<DoubleTag> pos = ((ListTag<DoubleTag>)tag.get("Pos"));
-		pos.get(0).data += x;
-		pos.get(1).data += y;
-		pos.get(2).data += z;
+    protected CompoundTag tag;
+    
+    protected Entity(CompoundTag tag)
+    {
+        this.tag = tag;
+    }
+    
+    public String getID()
+    {
+        return ((StringTag)tag.get("id")).data;
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected void translate(double x, double y, double z)
+    {
+        ListTag<DoubleTag> pos = ((ListTag<DoubleTag>)tag.get("Pos"));
+        pos.get(0).data += x;
+        pos.get(1).data += y;
+        pos.get(2).data += z;
 
-		Tag xTag = tag.get("TileX");
-		Tag yTag = tag.get("TileY");
-		Tag zTag = tag.get("TileZ");
+        Tag xTag = tag.get("TileX");
+        Tag yTag = tag.get("TileY");
+        Tag zTag = tag.get("TileZ");
 
-		if(xTag != null)
-			((IntTag)xTag).data += x;
-		if(yTag != null)
-			((IntTag)yTag).data += y;
-		if(zTag != null)
-			((IntTag)zTag).data += z;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public double getX()
-	{
-		return ((ListTag<DoubleTag>)tag.get("Pos")).get(0).data;
-	}
+        if(xTag != null)
+            ((IntTag)xTag).data += x;
+        if(yTag != null)
+            ((IntTag)yTag).data += y;
+        if(zTag != null)
+            ((IntTag)zTag).data += z;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public double getX()
+    {
+        return ((ListTag<DoubleTag>)tag.get("Pos")).get(0).data;
+    }
 
-	@SuppressWarnings("unchecked")
-	public double getY()
-	{
-		return ((ListTag<DoubleTag>)tag.get("Pos")).get(1).data;
-	}
+    @SuppressWarnings("unchecked")
+    public double getY()
+    {
+        return ((ListTag<DoubleTag>)tag.get("Pos")).get(1).data;
+    }
 
-	@SuppressWarnings("unchecked")
-	public double getZ()
-	{
-		return ((ListTag<DoubleTag>)tag.get("Pos")).get(2).data;
-	}
-	
-	protected CompoundTag getTag()
-	{
-		return tag;
-	}
+    @SuppressWarnings("unchecked")
+    public double getZ()
+    {
+        return ((ListTag<DoubleTag>)tag.get("Pos")).get(2).data;
+    }
+    
+    protected CompoundTag getTag()
+    {
+        return tag;
+    }
 
-	public Entity clone(double x, double y, double z)
-	{
-		Entity clone = clone();
-		clone.translate(x, y, z);
-		return clone;
-	}
-	
-	public abstract Entity clone();
+    public Entity clone(double x, double y, double z)
+    {
+        Entity clone = clone();
+        clone.translate(x, y, z);
+        return clone;
+    }
+    
+    public abstract Entity clone();
 }

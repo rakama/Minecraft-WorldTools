@@ -47,7 +47,7 @@ public class Schematic implements BlockCanvas
     public Schematic(int width, int height, int length)
     {
         this(width, height, length, new byte[width*height*length], 
-        		new byte[width*height*length]);
+                new byte[width*height*length]);
     }
     
     protected Schematic(int width, int height, int length, byte[] blockid, byte[] metadata)
@@ -62,7 +62,7 @@ public class Schematic implements BlockCanvas
     }
 
     @SuppressWarnings("unchecked")
-	protected Schematic(CompoundTag tag)
+    protected Schematic(CompoundTag tag)
     {
         this.tag = tag;
         this.width = ((ShortTag)tag.get("Width")).data;
@@ -77,17 +77,17 @@ public class Schematic implements BlockCanvas
         Tag tagEntities = tag.get("Entities");        
         if(tagEntities != null)
         {
-        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;        	
-        	for(int i=0; i<list.size(); i++)
-        		entities.add(EntityFactory.getEntity(list.get(i)));
+            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;            
+            for(int i=0; i<list.size(); i++)
+                entities.add(EntityFactory.getEntity(list.get(i)));
         }
         
         Tag tagTileEntities = tag.get("TileEntities");
         if(tagEntities != null)
         {
-        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;        	
-        	for(int i=0; i<list.size(); i++)
-        		tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;            
+            for(int i=0; i<list.size(); i++)
+                tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
         }
     }
     
@@ -161,90 +161,90 @@ public class Schematic implements BlockCanvas
     
     public void setBiome(int x, int z, int biome)
     {
-    	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
     
     public void setBiome(int x, int z, Biome biome)
     {
-    	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
     
     public int getBiome(int x, int z)
     {
-    	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
     
     public int getHeight(int x, int z)
     {
-    	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }    
 
     public List<Entity> getEntities()
     {
-    	return Collections.unmodifiableList(entities);
+        return Collections.unmodifiableList(entities);
     }
 
     public List<TileEntity> getTileEntities()
     {
-    	return Collections.unmodifiableList(tileEntities);
+        return Collections.unmodifiableList(tileEntities);
     }
 
     public List<Entity> getEntities(int x0, int y0, int z0, int x1, int y1, int z1)
     {
-    	List<Entity> list = new LinkedList<Entity>();
-    	
+        List<Entity> list = new LinkedList<Entity>();
+        
         for(Entity e : entities)
-        	if(e.getX() >= x0 && e.getX() <= x1
-        	&& e.getY() >= y0 && e.getY() <= y1
-        	&& e.getZ() >= z0 && e.getZ() <= z1)
-        		list.add(e);
+            if(e.getX() >= x0 && e.getX() <= x1
+            && e.getY() >= y0 && e.getY() <= y1
+            && e.getZ() >= z0 && e.getZ() <= z1)
+                list.add(e);
 
-    	return Collections.unmodifiableList(list);	
+        return Collections.unmodifiableList(list);    
     }
 
     public List<TileEntity> getTileEntities(int x0, int y0, int z0, int x1, int y1, int z1)
     {
-    	List<TileEntity> list = new LinkedList<TileEntity>();
-    	
+        List<TileEntity> list = new LinkedList<TileEntity>();
+        
         for(TileEntity e : tileEntities)
-        	if(e.getX() >= x0 && e.getX() <= x1
-        	&& e.getY() >= y0 && e.getY() <= y1
-        	&& e.getZ() >= z0 && e.getZ() <= z1)
-        		list.add(e);
+            if(e.getX() >= x0 && e.getX() <= x1
+            && e.getY() >= y0 && e.getY() <= y1
+            && e.getZ() >= z0 && e.getZ() <= z1)
+                list.add(e);
 
-    	return Collections.unmodifiableList(list);		
+        return Collections.unmodifiableList(list);        
     }
     
     public void addEntity(Entity e)
     {
-    	entities.add(e);
+        entities.add(e);
     }
     
     public void addTileEntity(TileEntity e)
     {
-    	tileEntities.add(e);
+        tileEntities.add(e);
     }
     
     public boolean removeEntity(Entity e)
     {
-    	return entities.remove(e);
+        return entities.remove(e);
     }
     
     public boolean removeTileEntity(TileEntity e)
     {
-    	return tileEntities.remove(e);
+        return tileEntities.remove(e);
     }
     
     public void importSchematic(int x0, int y0, int z0, Schematic schematic)
     {
-    	// TODO: implement
-    	throw new UnsupportedOperationException();
+        // TODO: implement
+        throw new UnsupportedOperationException();
     }
     
     public Schematic exportSchematic(int x0, int y0, int z0, int x1, int y1, int z1)
     {
-    	// TODO: implement
-    	throw new UnsupportedOperationException();
+        // TODO: implement
+        throw new UnsupportedOperationException();
     }
     
     public CompoundTag getTag()
@@ -268,12 +268,12 @@ public class Schematic implements BlockCanvas
 
         ListTag<CompoundTag> tagEntities = new ListTag<CompoundTag>("Entities");
         for(Entity e : entities)
-        	tagEntities.add(e.getTag());
+            tagEntities.add(e.getTag());
 
         ListTag<CompoundTag> tagTileEntities = new ListTag<CompoundTag>("TileEntities");
         for(TileEntity e : tileEntities)
-        	tagTileEntities.add(e.getTag());
-        
+            tagTileEntities.add(e.getTag());
+                
         tag.put("Entities", tagEntities);
         tag.put("TileEntities", tagTileEntities);
 

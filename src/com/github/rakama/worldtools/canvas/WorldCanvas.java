@@ -125,159 +125,159 @@ public class WorldCanvas implements BlockCanvas
 
     public List<Entity> getEntities(int x0, int y0, int z0, int x1, int y1, int z1)
     {
-    	List<Entity> list = new LinkedList<Entity>();
-    	
-    	for(int x=x0; x<=x1; x+=Chunk.width)
-    	{
-        	for(int z=z0; z<=z1; z+=Chunk.length)
-        	{
-        		Chunk chunk = manager.getChunk(x >> 4, z >> 4);
+        List<Entity> list = new LinkedList<Entity>();
+        
+        for(int x=x0; x<=x1; x+=Chunk.width)
+        {
+            for(int z=z0; z<=z1; z+=Chunk.length)
+            {
+                Chunk chunk = manager.getChunk(x >> 4, z >> 4);
 
                 if(chunk == null)
-                	continue;
+                    continue;
                 
                 for(Entity e : chunk.getEntities())
-                	if(e.getX() >= x0 && e.getX() <= x1
-                	&& e.getY() >= y0 && e.getY() <= y1
-                	&& e.getZ() >= z0 && e.getZ() <= z1)
-                		list.add(e);
-        	}
-    	}
-    	
-    	return Collections.unmodifiableList(list);
+                    if(e.getX() >= x0 && e.getX() <= x1
+                    && e.getY() >= y0 && e.getY() <= y1
+                    && e.getZ() >= z0 && e.getZ() <= z1)
+                        list.add(e);
+            }
+        }
+        
+        return Collections.unmodifiableList(list);
     }
 
     public List<TileEntity> getTileEntities(int x0, int y0, int z0, int x1, int y1, int z1)
     {
-    	List<TileEntity> list = new LinkedList<TileEntity>();
-    	
-    	for(int x=x0; x<=x1; x+=Chunk.width)
-    	{
-        	for(int z=z0; z<=z1; z+=Chunk.length)
-        	{
-        		Chunk chunk = manager.getChunk(x >> 4, z >> 4);
+        List<TileEntity> list = new LinkedList<TileEntity>();
+        
+        for(int x=x0; x<=x1; x+=Chunk.width)
+        {
+            for(int z=z0; z<=z1; z+=Chunk.length)
+            {
+                Chunk chunk = manager.getChunk(x >> 4, z >> 4);
 
                 if(chunk == null)
-                	continue;
+                    continue;
                 
                 for(TileEntity e : chunk.getTileEntities())
-                	if(e.getX() >= x0 && e.getX() <= x1
-                	&& e.getY() >= y0 && e.getY() <= y1
-                	&& e.getZ() >= z0 && e.getZ() <= z1)
-                		list.add(e);
-        	}
-    	}
-    	
-    	return Collections.unmodifiableList(list);
+                    if(e.getX() >= x0 && e.getX() <= x1
+                    && e.getY() >= y0 && e.getY() <= y1
+                    && e.getZ() >= z0 && e.getZ() <= z1)
+                        list.add(e);
+            }
+        }
+        
+        return Collections.unmodifiableList(list);
     }
     
     public void addEntity(Entity e)
-    {    	
-    	int x = (int)e.getX();
-    	int z = (int)e.getZ();
-		Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
-		chunk.addEntity(e);
+    {        
+        int x = (int)e.getX();
+        int z = (int)e.getZ();
+        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
+        chunk.addEntity(e);
     }
     
     public void addTileEntity(TileEntity e)
     {
-    	int x = e.getX();
-    	int z = e.getZ();
-		Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
-		chunk.addTileEntity(e);
+        int x = e.getX();
+        int z = e.getZ();
+        Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
+        chunk.addTileEntity(e);
     }
     
     public boolean removeEntity(Entity e)
     {
-    	int x = (int)e.getX();
-    	int z = (int)e.getZ();
-		Chunk chunk = manager.getChunk(x >> 4, z >> 4);
-		if(chunk == null)
-			return false;
-		return chunk.removeEntity(e);
+        int x = (int)e.getX();
+        int z = (int)e.getZ();
+        Chunk chunk = manager.getChunk(x >> 4, z >> 4);
+        if(chunk == null)
+            return false;
+        return chunk.removeEntity(e);
     }
     
     public boolean removeTileEntity(TileEntity e)
     {
-    	int x = e.getX();
-    	int z = e.getZ();
-		Chunk chunk = manager.getChunk(x >> 4, z >> 4);
-		if(chunk == null)
-			return false;
-		return chunk.removeTileEntity(e);
+        int x = e.getX();
+        int z = e.getZ();
+        Chunk chunk = manager.getChunk(x >> 4, z >> 4);
+        if(chunk == null)
+            return false;
+        return chunk.removeTileEntity(e);
     }
     
     public void importSchematic(int x0, int y0, int z0, Schematic schema)
     {
-    	int x1 = x0 + schema.getWidth() - 1;
-    	int y1 = y0 + schema.getHeight() - 1;
-    	int z1 = z0 + schema.getLength() - 1;
-    	
-    	int y0t = Math.max(0, y0);
-    	int y1t = Math.min(Chunk.height - 1, y1);
+        int x1 = x0 + schema.getWidth() - 1;
+        int y1 = y0 + schema.getHeight() - 1;
+        int z1 = z0 + schema.getLength() - 1;
+        
+        int y0t = Math.max(0, y0);
+        int y1t = Math.min(Chunk.height - 1, y1);
 
-    	for(int z=z0; z<=z1; z++)
-    	{
-	    	for(int x=x0; x<=x1; x++)
-	    	{
-            	for(int y=y0t; y<=y1t; y++)
-            	{
-            		Block block = schema.getBlock(x-x0, y-y0, z-z0);
-            		
-            		if(block == null)
-            			continue;
+        for(int z=z0; z<=z1; z++)
+        {
+            for(int x=x0; x<=x1; x++)
+            {
+                for(int y=y0t; y<=y1t; y++)
+                {
+                    Block block = schema.getBlock(x-x0, y-y0, z-z0);
+                    
+                    if(block == null)
+                        continue;
 
-            		if(y-y0 >= 0 && y-y0 < Chunk.height)
-            			setBlock(x, y, z, block);
-            	}
-	    	}
-    	}
+                    if(y-y0 >= 0 && y-y0 < Chunk.height)
+                        setBlock(x, y, z, block);
+                }
+            }
+        }
 
-    	for(Entity e : schema.getEntities())
-    		addEntity(e.clone(x0, y0, z0));
+        for(Entity e : schema.getEntities())
+            addEntity(e.clone(x0, y0, z0));
 
-    	for(TileEntity e : schema.getTileEntities())
-    		addTileEntity(e.clone(x0, y0, z0));
+        for(TileEntity e : schema.getTileEntities())
+            addTileEntity(e.clone(x0, y0, z0));
     }
     
     public Schematic exportSchematic(int x0, int y0, int z0, int x1, int y1, int z1)
     {
-    	if(x1 < x0){int temp = x1; x1 = x0; x0 = temp;}
-    	if(y1 < y0){int temp = y1; y1 = y0; y0 = temp;}
-    	if(z1 < z0){int temp = z1; z1 = z0; z0 = temp;}
+        if(x1 < x0){int temp = x1; x1 = x0; x0 = temp;}
+        if(y1 < y0){int temp = y1; y1 = y0; y0 = temp;}
+        if(z1 < z0){int temp = z1; z1 = z0; z0 = temp;}
 
-    	int width = x1 - x0 + 1;
-    	int height = y1 - y0 + 1;
-    	int length = z1 - z0 + 1;
-    	
-    	Schematic schema = new Schematic(width, height, length);
+        int width = x1 - x0 + 1;
+        int height = y1 - y0 + 1;
+        int length = z1 - z0 + 1;
+        
+        Schematic schema = new Schematic(width, height, length);
 
-    	int y0t = Math.max(0, y0);
-    	int y1t = Math.min(Chunk.height - 1, y1);
-    	
-    	for(int z=z0; z<=z1; z++)
-    	{
-	    	for(int x=x0; x<=x1; x++)
-	    	{
-            	for(int y=y0t; y<=y1t; y++)
-            	{
-            		Block block = getBlock(x, y, z);
+        int y0t = Math.max(0, y0);
+        int y1t = Math.min(Chunk.height - 1, y1);
+        
+        for(int z=z0; z<=z1; z++)
+        {
+            for(int x=x0; x<=x1; x++)
+            {
+                for(int y=y0t; y<=y1t; y++)
+                {
+                    Block block = getBlock(x, y, z);
 
-            		if(block == null)
-            			continue;
-            		
-            		if(y-y0 >= 0 && y-y0 < Chunk.height)
-            			schema.setBlock(x-x0, y-y0, z-z0, block);
-            	}
-        	}
-    	}
-    	
-    	for(Entity e : getEntities(x0, y0, z0, x1, y1, z1))
-    		schema.addEntity(e.clone(-x0, -y0, -z0));
-    	
-    	for(TileEntity e : getTileEntities(x0, y0, z0, x1, y1, z1))
-    		schema.addTileEntity(e.clone(-x0, -y0, -z0));
-    	
-    	return schema;
+                    if(block == null)
+                        continue;
+                    
+                    if(y-y0 >= 0 && y-y0 < Chunk.height)
+                        schema.setBlock(x-x0, y-y0, z-z0, block);
+                }
+            }
+        }
+        
+        for(Entity e : getEntities(x0, y0, z0, x1, y1, z1))
+            schema.addEntity(e.clone(-x0, -y0, -z0));
+        
+        for(TileEntity e : getTileEntities(x0, y0, z0, x1, y1, z1))
+            schema.addTileEntity(e.clone(-x0, -y0, -z0));
+        
+        return schema;
     }
 }

@@ -21,13 +21,13 @@ import com.mojang.nbt.CompoundTag;
 
 class TileEntityImpl extends TileEntity
 {
-	protected TileEntityImpl(CompoundTag tag)
-	{
-		super(tag);
-	}
-	
-	public TileEntityImpl clone()
-	{
-		return new TileEntityImpl((CompoundTag)tag.copy());
-	}
+    protected TileEntityImpl(CompoundTag tag)
+    {
+        super(tag);
+    }
+    
+    public TileEntityImpl clone()
+    {
+        return new TileEntityImpl((CompoundTag)tag.copy());
+    }
 }

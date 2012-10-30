@@ -175,28 +175,28 @@ class ManagedChunk extends Chunk
     public void addEntity(Entity e)
     {
         invalidateFile();
-    	super.addEntity(e);
+        super.addEntity(e);
     }
 
     @Override
     public void addTileEntity(TileEntity e)
     {
         invalidateFile();
-    	super.addTileEntity(e);
+        super.addTileEntity(e);
     }
 
     @Override
     public boolean removeEntity(Entity e)
     {
         invalidateFile();
-    	return super.removeEntity(e);
+        return super.removeEntity(e);
     }
 
     @Override
     public boolean removeTileEntity(TileEntity e)
     {
         invalidateFile();
-    	return super.removeTileEntity(e);
+        return super.removeTileEntity(e);
     }
 
     protected ChunkID getID()
@@ -212,7 +212,7 @@ class ManagedChunk extends Chunk
     }
     
     @SuppressWarnings("unchecked")
-	public static ManagedChunk loadChunk(CompoundTag tag, ChunkManager manager)
+    public static ManagedChunk loadChunk(CompoundTag tag, ChunkManager manager)
     {
         CompoundTag level = (CompoundTag) tag.get("Level");
 
@@ -230,17 +230,17 @@ class ManagedChunk extends Chunk
         Tag tagEntities = level.get("Entities");   
         if(tagEntities != null)
         {
-        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;        	
-        	for(int i=0; i<list.size(); i++)
-        		chunk.entities.add(EntityFactory.getEntity(list.get(i)));
+            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;            
+            for(int i=0; i<list.size(); i++)
+                chunk.entities.add(EntityFactory.getEntity(list.get(i)));
         }
         
         Tag tagTileEntities = level.get("TileEntities");
         if(tagEntities != null)
         {
-        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;        	
-        	for(int i=0; i<list.size(); i++)
-        		chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;            
+            for(int i=0; i<list.size(); i++)
+                chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
         }
         
         chunk.tag = tag;

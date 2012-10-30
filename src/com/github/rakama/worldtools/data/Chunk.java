@@ -241,32 +241,32 @@ public class Chunk
     
     public List<Entity> getEntities()
     {
-    	return Collections.unmodifiableList(entities);
+        return Collections.unmodifiableList(entities);
     }
 
     public List<TileEntity> getTileEntities()
     {
-    	return Collections.unmodifiableList(tileEntities);
+        return Collections.unmodifiableList(tileEntities);
     }
 
     public void addEntity(Entity e)
     {
-    	entities.add(e);
+        entities.add(e);
     }
     
     public void addTileEntity(TileEntity e)
     {
-    	tileEntities.add(e);
+        tileEntities.add(e);
     }
     
     public boolean removeEntity(Entity e)
     {
-    	return entities.remove(e);
+        return entities.remove(e);
     }
     
     public boolean removeTileEntity(TileEntity e)
     {
-    	return tileEntities.remove(e);
+        return tileEntities.remove(e);
     }
     
     private synchronized void createSection(int index)
@@ -292,11 +292,11 @@ public class Chunk
         
         ListTag<CompoundTag> tagEntities = new ListTag<CompoundTag>("Entities");
         for(Entity e : entities)
-        	tagEntities.add(e.getTag());
+            tagEntities.add(e.getTag());
 
         ListTag<CompoundTag> tagTileEntities = new ListTag<CompoundTag>("TileEntities");
         for(TileEntity e : tileEntities)
-        	tagTileEntities.add(e.getTag());
+            tagTileEntities.add(e.getTag());
         
         level.put("Entities", tagEntities);
         level.put("TileEntities", tagTileEntities);
@@ -420,7 +420,7 @@ public class Chunk
     }
     
     @SuppressWarnings("unchecked")
-	public static Chunk loadChunk(CompoundTag tag)
+    public static Chunk loadChunk(CompoundTag tag)
     {
         CompoundTag level = (CompoundTag) tag.get("Level");
 
@@ -436,17 +436,17 @@ public class Chunk
         Tag tagEntities = level.get("Entities");   
         if(tagEntities != null)
         {
-        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;        	
-        	for(int i=0; i<list.size(); i++)
-        		chunk.entities.add(EntityFactory.getEntity(list.get(i)));
+            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;            
+            for(int i=0; i<list.size(); i++)
+                chunk.entities.add(EntityFactory.getEntity(list.get(i)));
         }
         
         Tag tagTileEntities = level.get("TileEntities");
         if(tagEntities != null)
         {
-        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;        	
-        	for(int i=0; i<list.size(); i++)
-        		chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;            
+            for(int i=0; i<list.size(); i++)
+                chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
         }
 
         chunk.tag = tag;

@@ -24,48 +24,48 @@ import com.mojang.nbt.StringTag;
 import com.mojang.nbt.Tag;
 
 public class EntityFactory
-{	
-	public static Entity getEntity(CompoundTag tag)
-	{
-		Tag temp = tag.get("id");
-		
-		if(temp == null || !(temp instanceof StringTag))
-			throw new IllegalArgumentException("Unrecognized tag format");
-		
-		StringTag id = (StringTag)temp;
-		
-		return new EntityImpl(tag);
-	}
+{    
+    public static Entity getEntity(CompoundTag tag)
+    {
+        Tag temp = tag.get("id");
+        
+        if(temp == null || !(temp instanceof StringTag))
+            throw new IllegalArgumentException("Unrecognized tag format");
+        
+        StringTag id = (StringTag)temp;
+        
+        return new EntityImpl(tag);
+    }
 
-	public static TileEntity getTileEntity(CompoundTag tag)
-	{
-		Tag temp = tag.get("id");
-		
-		if(temp == null || !(temp instanceof StringTag))
-			throw new IllegalArgumentException("Unrecognized tag format");
-		
-		StringTag id = (StringTag)temp;
-		
-		if(id.data.equals("Control"))
-			return new CommandBlock(tag);
-		else
-			return new TileEntityImpl(tag);
-	}
-	
-	public static CommandBlock createCommandBlock(int x, int y, int z, String command)
-	{
-		CompoundTag root = createRoot(x, y, z, "Control");
-		root.put("Command", new StringTag("Command", command));
-		return new CommandBlock(root);
-	}
-	
-	protected static CompoundTag createRoot(int x, int y, int z, String id)
-	{
-		CompoundTag root = new CompoundTag();
-		root.put("x", new IntTag("x", x));
-		root.put("y", new IntTag("y", y));
-		root.put("z", new IntTag("z", z));
-		root.put("id", new StringTag("id", id));
-		return root;
-	}
+    public static TileEntity getTileEntity(CompoundTag tag)
+    {
+        Tag temp = tag.get("id");
+        
+        if(temp == null || !(temp instanceof StringTag))
+            throw new IllegalArgumentException("Unrecognized tag format");
+        
+        StringTag id = (StringTag)temp;
+        
+        if(id.data.equals("Control"))
+            return new CommandBlock(tag);
+        else
+            return new TileEntityImpl(tag);
+    }
+    
+    public static CommandBlock createCommandBlock(int x, int y, int z, String command)
+    {
+        CompoundTag root = createRoot(x, y, z, "Control");
+        root.put("Command", new StringTag("Command", command));
+        return new CommandBlock(root);
+    }
+    
+    protected static CompoundTag createRoot(int x, int y, int z, String id)
+    {
+        CompoundTag root = new CompoundTag();
+        root.put("x", new IntTag("x", x));
+        root.put("y", new IntTag("y", y));
+        root.put("z", new IntTag("z", z));
+        root.put("id", new StringTag("id", id));
+        return root;
+    }
 }
