@@ -19,11 +19,15 @@ package com.github.rakama.worldtools.io;
 import com.github.rakama.worldtools.coord.Coordinate2D;
 import com.github.rakama.worldtools.data.Block;
 import com.github.rakama.worldtools.data.Chunk;
+import com.github.rakama.worldtools.data.Entity;
+import com.github.rakama.worldtools.data.TileEntity;
+import com.github.rakama.worldtools.data.entity.EntityFactory;
 import com.mojang.nbt.ByteArrayTag;
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.IntArrayTag;
 import com.mojang.nbt.IntTag;
 import com.mojang.nbt.ListTag;
+import com.mojang.nbt.Tag;
 
 class ManagedChunk extends Chunk
 {
@@ -167,6 +171,34 @@ class ManagedChunk extends Chunk
         super.clearSkyLights();
     }
 
+    @Override
+    public void addEntity(Entity e)
+    {
+        invalidateFile();
+    	super.addEntity(e);
+    }
+
+    @Override
+    public void addTileEntity(TileEntity e)
+    {
+        invalidateFile();
+    	super.addTileEntity(e);
+    }
+
+    @Override
+    public boolean removeEntity(Entity e)
+    {
+        invalidateFile();
+    	return super.removeEntity(e);
+    }
+
+    @Override
+    public boolean removeTileEntity(TileEntity e)
+    {
+        invalidateFile();
+    	return super.removeTileEntity(e);
+    }
+
     protected ChunkID getID()
     {
         return id;
@@ -179,11 +211,11 @@ class ManagedChunk extends Chunk
             manager.requestCleanup(this);
     }
     
-    public static ManagedChunk loadChunk(CompoundTag tag, ChunkManager manager)
+    @SuppressWarnings("unchecked")
+	public static ManagedChunk loadChunk(CompoundTag tag, ChunkManager manager)
     {
         CompoundTag level = (CompoundTag) tag.get("Level");
 
-        @SuppressWarnings("unchecked")
         ListTag<CompoundTag> sections = (ListTag<CompoundTag>) level.get("Sections");
         IntArrayTag heightmap = (IntArrayTag) level.get("HeightMap");
         ByteArrayTag biome = (ByteArrayTag) level.get("Biomes");
@@ -192,11 +224,26 @@ class ManagedChunk extends Chunk
 
         ManagedChunk chunk;
         chunk = new ManagedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
-        
         // TODO: create ManagedSection to catch Section changes
         chunk.loadSections(sections);
-        chunk.tag = tag;
 
+        Tag tagEntities = level.get("Entities");   
+        if(tagEntities != null)
+        {
+        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;        	
+        	for(int i=0; i<list.size(); i++)
+        		chunk.entities.add(EntityFactory.getEntity(list.get(i)));
+        }
+        
+        Tag tagTileEntities = level.get("TileEntities");
+        if(tagEntities != null)
+        {
+        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;        	
+        	for(int i=0; i<list.size(); i++)
+        		chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+        }
+        
+        chunk.tag = tag;
         return chunk;
     }
 }

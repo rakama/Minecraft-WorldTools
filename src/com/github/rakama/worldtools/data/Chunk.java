@@ -16,6 +16,11 @@
 
 package com.github.rakama.worldtools.data;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.github.rakama.worldtools.data.entity.EntityFactory;
 import com.mojang.nbt.ByteArrayTag;
 import com.mojang.nbt.ByteTag;
 import com.mojang.nbt.CompoundTag;
@@ -23,6 +28,7 @@ import com.mojang.nbt.IntArrayTag;
 import com.mojang.nbt.IntTag;
 import com.mojang.nbt.ListTag;
 import com.mojang.nbt.LongTag;
+import com.mojang.nbt.Tag;
 
 public class Chunk
 {
@@ -43,6 +49,9 @@ public class Chunk
     protected int[] heightmap;
     protected byte[] biomes;
 
+    protected List<Entity> entities;
+    protected List<TileEntity> tileEntities;
+    
     protected CompoundTag tag;
 
     public Chunk(int x, int z)
@@ -60,6 +69,8 @@ public class Chunk
         this.biomes = biomes;
         this.x = x;
         this.z = z;
+        this.entities = new ArrayList<Entity>();
+        this.tileEntities = new ArrayList<TileEntity>();
     }
     
     public int getX()
@@ -228,6 +239,36 @@ public class Chunk
         }
     }
     
+    public List<Entity> getEntities()
+    {
+    	return Collections.unmodifiableList(entities);
+    }
+
+    public List<TileEntity> getTileEntities()
+    {
+    	return Collections.unmodifiableList(tileEntities);
+    }
+
+    public void addEntity(Entity e)
+    {
+    	entities.add(e);
+    }
+    
+    public void addTileEntity(TileEntity e)
+    {
+    	tileEntities.add(e);
+    }
+    
+    public boolean removeEntity(Entity e)
+    {
+    	return entities.remove(e);
+    }
+    
+    public boolean removeTileEntity(TileEntity e)
+    {
+    	return tileEntities.remove(e);
+    }
+    
     private synchronized void createSection(int index)
     {
         if(sections[index] == null)        
@@ -248,6 +289,17 @@ public class Chunk
         
         CompoundTag level = (CompoundTag)tag.get("Level");
         level.put("Sections", list);
+        
+        ListTag<CompoundTag> tagEntities = new ListTag<CompoundTag>("Entities");
+        for(Entity e : entities)
+        	tagEntities.add(e.getTag());
+
+        ListTag<CompoundTag> tagTileEntities = new ListTag<CompoundTag>("TileEntities");
+        for(TileEntity e : tileEntities)
+        	tagTileEntities.add(e.getTag());
+        
+        level.put("Entities", tagEntities);
+        level.put("TileEntities", tagTileEntities);
 
         return tag;
     }
@@ -367,11 +419,11 @@ public class Chunk
         }
     }
     
-    public static Chunk loadChunk(CompoundTag tag)
+    @SuppressWarnings("unchecked")
+	public static Chunk loadChunk(CompoundTag tag)
     {
         CompoundTag level = (CompoundTag) tag.get("Level");
 
-        @SuppressWarnings("unchecked")
         ListTag<CompoundTag> sections = (ListTag<CompoundTag>) level.get("Sections");
         IntArrayTag heightmap = (IntArrayTag) level.get("HeightMap");
         ByteArrayTag biome = (ByteArrayTag) level.get("Biomes");
@@ -380,8 +432,24 @@ public class Chunk
 
         Chunk chunk = new Chunk(xPos.data, zPos.data, heightmap.data, biome.data);
         chunk.loadSections(sections);
-        chunk.tag = tag;
 
+        Tag tagEntities = level.get("Entities");   
+        if(tagEntities != null)
+        {
+        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;        	
+        	for(int i=0; i<list.size(); i++)
+        		chunk.entities.add(EntityFactory.getEntity(list.get(i)));
+        }
+        
+        Tag tagTileEntities = level.get("TileEntities");
+        if(tagEntities != null)
+        {
+        	ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;        	
+        	for(int i=0; i<list.size(); i++)
+        		chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+        }
+
+        chunk.tag = tag;
         return chunk;
     }
     

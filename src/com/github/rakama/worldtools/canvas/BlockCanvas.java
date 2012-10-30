@@ -16,8 +16,13 @@
 
 package com.github.rakama.worldtools.canvas;
 
+import java.util.List;
+
 import com.github.rakama.worldtools.data.Biome;
 import com.github.rakama.worldtools.data.Block;
+import com.github.rakama.worldtools.data.Entity;
+import com.github.rakama.worldtools.data.Schematic;
+import com.github.rakama.worldtools.data.TileEntity;
 
 public interface BlockCanvas
 {    
@@ -32,4 +37,14 @@ public interface BlockCanvas
     public void setBiome(int x, int z, Biome biome);    
     public int getBiome(int x, int z);
     public int getHeight(int x, int z);
+
+    public List<Entity> getEntities(int x0, int y0, int z0, int x1, int y1, int z1);
+    public List<TileEntity> getTileEntities(int x0, int y0, int z0, int x1, int y1, int z1);
+    public void addEntity(Entity e);
+    public void addTileEntity(TileEntity e);
+    public boolean removeEntity(Entity e);
+    public boolean removeTileEntity(TileEntity e);
+    
+    public void importSchematic(int x0, int y0, int z0, Schematic schematic);
+    public Schematic exportSchematic(int x0, int y0, int z0, int x1, int y1, int z1);
 }
