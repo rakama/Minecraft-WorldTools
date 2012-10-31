@@ -72,6 +72,10 @@ public class Exporter
             System.exit(0);
         }
 
+        if(width < 0){xSrc += width; width = -width;}
+        if(height < 0){ySrc += height; height = -height;}
+        if(length < 0){zSrc += length; length = -length;}
+
         WorldManager srcManager = WorldTools.getWorldManager(new File(src));
         WorldManager destManager = WorldTools.getWorldManager(new File(dest));
         BlockCanvas srcCanvas = srcManager.getCanvas();
@@ -84,7 +88,7 @@ public class Exporter
         int dx = xSrc - xDest;
         int dy = ySrc - yDest;
         int dz = zSrc - zDest;
-        
+
         // create regular expression for tp commands
         String space = "\\s+?"; 
         String target = "(@[prafPRAF](?:\\[.*\\])*?)";
@@ -104,7 +108,10 @@ public class Exporter
                 int yc = cb.getY();
                 int zc = cb.getZ();
                 String cmd = cb.getCommand();
-                      
+                
+                if(cmd == null)
+                    continue;                
+                
                 Matcher matcher = pattern.matcher(cmd);
                 
                 if(matcher.matches())
@@ -115,6 +122,8 @@ public class Exporter
                     int zt = Integer.parseInt(matcher.group(4)) - dz;
                     cmd = "/tp " + tar + " " + xt + " " + yt + " " + zt;
                 }
+                else
+                    continue;
                         
                 cb = EntityFactory.createCommandBlock(xc, yc, zc, cmd);
                 schema.removeTileEntity(e);

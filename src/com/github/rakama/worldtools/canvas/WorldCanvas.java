@@ -127,9 +127,9 @@ public class WorldCanvas implements BlockCanvas
     {
         List<Entity> list = new LinkedList<Entity>();
         
-        for(int x=x0; x<=x1; x+=Chunk.width)
+        for(int x=x0; x<=x1+Chunk.width; x+=Chunk.width)
         {
-            for(int z=z0; z<=z1; z+=Chunk.length)
+            for(int z=z0; z<=z1+Chunk.length; z+=Chunk.length)
             {
                 Chunk chunk = manager.getChunk(x >> 4, z >> 4);
 
@@ -151,12 +151,12 @@ public class WorldCanvas implements BlockCanvas
     {
         List<TileEntity> list = new LinkedList<TileEntity>();
         
-        for(int x=x0; x<=x1; x+=Chunk.width)
+        for(int x=x0; x<=x1+Chunk.width; x+=Chunk.width)
         {
-            for(int z=z0; z<=z1; z+=Chunk.length)
+            for(int z=z0; z<=z1+Chunk.length; z+=Chunk.length)
             {
                 Chunk chunk = manager.getChunk(x >> 4, z >> 4);
-
+                
                 if(chunk == null)
                     continue;
                 
@@ -242,14 +242,13 @@ public class WorldCanvas implements BlockCanvas
     
     public Schematic exportSchematic(int x0, int y0, int z0, int x1, int y1, int z1)
     {
-        if(x1 < x0){int temp = x1; x1 = x0; x0 = temp;}
-        if(y1 < y0){int temp = y1; y1 = y0; y0 = temp;}
-        if(z1 < z0){int temp = z1; z1 = z0; z0 = temp;}
+        if(x1 < x0 || y1 < y0 || z1 < z0)
+            throw new IllegalArgumentException("Dimensions must be positive");
 
         int width = x1 - x0 + 1;
         int height = y1 - y0 + 1;
         int length = z1 - z0 + 1;
-        
+
         Schematic schema = new Schematic(width, height, length);
 
         int y0t = Math.max(0, y0);
@@ -271,13 +270,13 @@ public class WorldCanvas implements BlockCanvas
                 }
             }
         }
-        
+
         for(Entity e : getEntities(x0, y0, z0, x1, y1, z1))
             schema.addEntity(e.clone(-x0, -y0, -z0));
         
         for(TileEntity e : getTileEntities(x0, y0, z0, x1, y1, z1))
             schema.addTileEntity(e.clone(-x0, -y0, -z0));
-        
+
         return schema;
     }
 }

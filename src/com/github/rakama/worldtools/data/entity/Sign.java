@@ -19,26 +19,29 @@ package com.github.rakama.worldtools.data.entity;
 import com.github.rakama.worldtools.data.TileEntity;
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.StringTag;
-import com.mojang.nbt.Tag;
 
-public class CommandBlock extends TileEntity
+public class Sign extends TileEntity
 {
-    protected CommandBlock(CompoundTag tag)
+    protected Sign(CompoundTag tag)
     {
         super(tag);
     }
     
-    public String getCommand()
+    public String getText()
     {
-        Tag command = tag.get("Command");        
-        if(command == null)
-            return null;
-        else
-            return ((StringTag)command).data;
+        return getText(1) + "\n" + getText(2) + "\n" + getText(3) + "\n" + getText(4);
     }
     
-    public CommandBlock clone()
+    public String getText(int i)
     {
-        return new CommandBlock((CompoundTag)tag.copy());
+        if(i < 1 || i > 4)
+            return null;
+        
+        return ((StringTag)tag.get("Text" + i)).data;
+    }
+    
+    public Sign clone()
+    {
+        return new Sign((CompoundTag)tag.copy());
     }
 }

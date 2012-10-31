@@ -48,6 +48,8 @@ public class EntityFactory
         
         if(id.data.equals("Control"))
             return new CommandBlock(tag);
+        else if(id.data.equals("Sign"))
+            return new Sign(tag);
         else
             return new TileEntityImpl(tag);
     }
