@@ -125,6 +125,9 @@ public class WorldCanvas implements BlockCanvas
 
     public List<Entity> getEntities(int x0, int y0, int z0, int x1, int y1, int z1)
     {
+        if(x1 < x0 || y1 < y0 || z1 < z0)
+            throw new IllegalArgumentException("Dimensions must be positive");
+
         List<Entity> list = new LinkedList<Entity>();
         
         for(int x=x0; x<=x1+Chunk.width; x+=Chunk.width)
@@ -149,6 +152,9 @@ public class WorldCanvas implements BlockCanvas
 
     public List<TileEntity> getTileEntities(int x0, int y0, int z0, int x1, int y1, int z1)
     {
+        if(x1 < x0 || y1 < y0 || z1 < z0)
+            throw new IllegalArgumentException("Dimensions must be positive");
+
         List<TileEntity> list = new LinkedList<TileEntity>();
         
         for(int x=x0; x<=x1+Chunk.width; x+=Chunk.width)

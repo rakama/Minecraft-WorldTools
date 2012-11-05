@@ -52,7 +52,7 @@ public class ColorProfile
         {
             default_profile = getColorProfile(ColorProfile.class.getResource(default_file));
         }
-        catch(IOException e)
+        catch(Exception e)
         {
             throw new RuntimeException("WorldTools encountered an error while initializing!", e);
         }

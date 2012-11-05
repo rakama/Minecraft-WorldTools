@@ -19,6 +19,7 @@ package com.github.rakama.examples.export;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +37,13 @@ public class Exporter
 {
     public static void main(String[] args) throws IOException
     {
-        if(args.length < 11)
+        List<String> list = new ArrayList<String>(Arrays.asList(args));
+        
+        boolean copyBiomes = false;
+        if(list.remove("-b"))
+            copyBiomes = true;
+
+        if(list.size() < 11)
         {
             System.err.println("Error: Incorrect number of arguments.");
             System.exit(0);
@@ -53,20 +60,21 @@ public class Exporter
         
         try
         {
-            src = args[0];
-            xSrc = Integer.parseInt(args[1]);
-            ySrc = Integer.parseInt(args[2]);
-            zSrc = Integer.parseInt(args[3]);
-            width = Integer.parseInt(args[4]);
-            height = Integer.parseInt(args[5]);
-            length = Integer.parseInt(args[6]);
-            dest = args[7];
-            xDest = Integer.parseInt(args[8]);
-            yDest = Integer.parseInt(args[9]);
-            zDest = Integer.parseInt(args[10]);
+            src = list.get(0);
+            xSrc = Integer.parseInt(list.get(1));
+            ySrc = Integer.parseInt(list.get(2));
+            zSrc = Integer.parseInt(list.get(3));
+            width = Integer.parseInt(list.get(4));
+            height = Integer.parseInt(list.get(5));
+            length = Integer.parseInt(list.get(6));
+            dest = list.get(7);
+            xDest = Integer.parseInt(list.get(8));
+            yDest = Integer.parseInt(list.get(9));
+            zDest = Integer.parseInt(list.get(10));
         }
         catch(Exception e)
         {
+            System.out.println(list);
             System.err.println("Error: Unable to parse arguments.");
             System.err.println(e);
             System.exit(0);
@@ -147,6 +155,21 @@ public class Exporter
         
         // import schematic to destination map
         destCanvas.importSchematic(xDest, yDest, zDest, schema);
+        
+        // copy biomes from source to destination
+        if(copyBiomes)
+        {
+            for(int z=zSrc; z<zSrc+width; z++)
+            {
+                for(int x=xSrc; x<xSrc+width; x++)
+                {
+                    int biome = srcCanvas.getBiome(x, z);
+                    if(biome < 0)
+                        biome = 0;
+                    destCanvas.setBiome(x - dx, z - dz, biome);
+                }
+            }
+        }
         
         destManager.closeAll();
         srcManager.closeAll();

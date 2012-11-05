@@ -38,6 +38,24 @@ public abstract class Entity
     }
     
     @SuppressWarnings("unchecked")
+    public double getX()
+    {
+        return ((ListTag<DoubleTag>)tag.get("Pos")).get(0).data;
+    }
+
+    @SuppressWarnings("unchecked")
+    public double getY()
+    {
+        return ((ListTag<DoubleTag>)tag.get("Pos")).get(1).data;
+    }
+
+    @SuppressWarnings("unchecked")
+    public double getZ()
+    {
+        return ((ListTag<DoubleTag>)tag.get("Pos")).get(2).data;
+    }
+    
+    @SuppressWarnings("unchecked")
     protected void translate(double x, double y, double z)
     {
         ListTag<DoubleTag> pos = ((ListTag<DoubleTag>)tag.get("Pos"));
@@ -57,24 +75,6 @@ public abstract class Entity
             ((IntTag)zTag).data += z;
     }
     
-    @SuppressWarnings("unchecked")
-    public double getX()
-    {
-        return ((ListTag<DoubleTag>)tag.get("Pos")).get(0).data;
-    }
-
-    @SuppressWarnings("unchecked")
-    public double getY()
-    {
-        return ((ListTag<DoubleTag>)tag.get("Pos")).get(1).data;
-    }
-
-    @SuppressWarnings("unchecked")
-    public double getZ()
-    {
-        return ((ListTag<DoubleTag>)tag.get("Pos")).get(2).data;
-    }
-    
     protected CompoundTag getTag()
     {
         return tag;
@@ -88,4 +88,17 @@ public abstract class Entity
     }
     
     public abstract Entity clone();
+    
+    public int hashCode()
+    {
+        return tag.hashCode();
+    }
+    
+    public boolean equals(Entity e)
+    {
+        if(e == null)
+            return false;
+        else
+            return e == this || tag.equals(e.tag);
+    }
 }

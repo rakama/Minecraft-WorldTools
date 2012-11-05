@@ -37,6 +37,21 @@ public abstract class TileEntity
         return ((StringTag)tag.get("id")).data;
     }
 
+    public int getX()
+    {
+        return ((IntTag)tag.get("x")).data;
+    }
+
+    public int getY()
+    {
+        return ((IntTag)tag.get("y")).data;
+    }
+
+    public int getZ()
+    {
+        return ((IntTag)tag.get("z")).data;
+    }
+    
     @SuppressWarnings("unchecked")
     protected void translate(int x, int y, int z)
     {
@@ -61,21 +76,6 @@ public abstract class TileEntity
         }
     }
     
-    public int getX()
-    {
-        return ((IntTag)tag.get("x")).data;
-    }
-
-    public int getY()
-    {
-        return ((IntTag)tag.get("y")).data;
-    }
-
-    public int getZ()
-    {
-        return ((IntTag)tag.get("z")).data;
-    }
-    
     protected CompoundTag getTag()
     {
         return tag;
@@ -89,4 +89,17 @@ public abstract class TileEntity
     }
     
     public abstract TileEntity clone();
+
+    public int hashCode()
+    {
+        return tag.hashCode();
+    }
+    
+    public boolean equals(TileEntity e)
+    {
+        if(e == null)
+            return false;
+        else
+            return e == this || tag.equals(e.tag);
+    }
 }
