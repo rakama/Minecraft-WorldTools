@@ -28,7 +28,6 @@ import rakama.worldtools.data.Schematic;
 import rakama.worldtools.data.TileEntity;
 import rakama.worldtools.io.ChunkManager;
 
-
 public class WorldCanvas implements BlockCanvas
 {    
     protected final ChunkManager manager;

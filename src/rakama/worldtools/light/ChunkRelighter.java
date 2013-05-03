@@ -27,7 +27,7 @@ public class ChunkRelighter
 
     protected CircularBuffer queue;
     protected LightCache cache;
-    protected ChunkProtector[] protector;
+    protected TempChunk[] tempChunk;
 
     protected final int span, width, length, height;
 
@@ -48,12 +48,12 @@ public class ChunkRelighter
 
         queue = new CircularBuffer(width * length * height);
         cache = new LightCache(span, span);
-        protector = new ChunkProtector[span * span];
+        tempChunk = new TempChunk[span * span];
 
         for(int z = 0; z < span; z++)
             for(int x = 0; x < span; x++)
                 if(isImmutable(x, z))
-                    protector[x + z * span] = new ChunkProtector();
+                    tempChunk[x + z * span] = new TempChunk();
     }
 
     public int getSpan()
@@ -83,7 +83,7 @@ public class ChunkRelighter
         propagateLights();
         
         cache.clear();
-        clearProtectors();
+        clearTemp();
     }
 
     protected void fillLightCache(Chunk[] localChunks)
@@ -102,7 +102,7 @@ public class ChunkRelighter
         }
         
         if(isImmutable(x, z))
-            chunk = getProtector(x, z, chunk);
+            chunk = getTempChunk(x, z, chunk);
 
         chunk.trimSections();        
         chunk.recomputeHeightmap();                  
@@ -168,22 +168,22 @@ public class ChunkRelighter
         return true;
     }
 
-    private ChunkProtector getProtector(int x, int z, Chunk chunk)
+    private TempChunk getTempChunk(int x, int z, Chunk chunk)
     {
         if(chunk == null)
             return null;
         
-        ChunkProtector p = protector[x + z * span];
-        p.assign(chunk);
+        TempChunk p = tempChunk[x + z * span];
+        p.assignData(chunk);
         return p;
     }
     
-    private void clearProtectors()
+    private void clearTemp()
     {
         for(int z = 0; z < span; z++)
             for(int x = 0; x < span; x++)
                 if(isImmutable(x, z))
-                    protector[x + z * span].clear();
+                    tempChunk[x + z * span].clear();
     }
     
     private boolean isImmutable(int x, int z)

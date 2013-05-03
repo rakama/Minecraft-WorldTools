@@ -23,12 +23,11 @@ import rakama.worldtools.data.Chunk;
 import rakama.worldtools.data.Section;
 import rakama.worldtools.util.NibbleArray;
 
-
-final class ChunkProtector extends Chunk
+final class TempChunk extends Chunk
 {    
     NibbleArray[] tempLights;
     
-    public ChunkProtector()
+    public TempChunk()
     {
         super(-1, -1);
         
@@ -37,7 +36,7 @@ final class ChunkProtector extends Chunk
             tempLights[i] = new NibbleArray(Section.volume);
     }
     
-    public void assign(Chunk chunk)
+    public void assignData(Chunk chunk)
     {
         if(chunk == null)
             throw new NullPointerException();

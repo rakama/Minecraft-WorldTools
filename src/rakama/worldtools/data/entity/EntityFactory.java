@@ -30,7 +30,9 @@ import com.mojang.nbt.StringTag;
 import com.mojang.nbt.Tag;
 
 public class EntityFactory
-{    
+{ 
+    // TODO: manage entities so read/write is handled properly
+    
     public static Entity getEntity(CompoundTag tag)
     {
         Tag temp = tag.get("id");

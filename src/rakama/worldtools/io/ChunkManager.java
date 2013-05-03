@@ -96,7 +96,7 @@ public class ChunkManager
     public Chunk getChunk(int x, int z, boolean create, boolean relight)
     {
         ManagedChunk chunk = getChunk(x, z, priority_access, true, create);        
-        if(chunk != null && chunk.needsRelight())
+        if(chunk != null && chunk.needsRelight() && lightingEnabled)
             relightChunk(chunk); 
         doCleanup(minimum_cleanup_size);
         return chunk;
