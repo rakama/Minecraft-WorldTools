@@ -25,14 +25,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import rakama.worldtools.WorldManager;
-import rakama.worldtools.WorldTools;
-import rakama.worldtools.canvas.BlockCanvas;
+import rakama.worldtools.canvas.WorldCanvas;
 import rakama.worldtools.data.Entity;
 import rakama.worldtools.data.Schematic;
 import rakama.worldtools.data.TileEntity;
 import rakama.worldtools.data.entity.CommandBlock;
 import rakama.worldtools.data.entity.EntityFactory;
-
 
 public class Exporter
 {
@@ -84,10 +82,10 @@ public class Exporter
         if(height < 0){ySrc += height; height = -height;}
         if(length < 0){zSrc += length; length = -length;}
 
-        WorldManager srcManager = WorldTools.getWorldManager(new File(src));
-        WorldManager destManager = WorldTools.getWorldManager(new File(dest));
-        BlockCanvas srcCanvas = srcManager.getCanvas();
-        BlockCanvas destCanvas = destManager.getCanvas();
+        WorldManager srcManager = WorldManager.getWorldManager(new File(src));
+        WorldManager destManager = WorldManager.getWorldManager(new File(dest));
+        WorldCanvas srcCanvas = srcManager.getCanvas();
+        WorldCanvas destCanvas = destManager.getCanvas();
         
         // export schematic from source map
         Schematic schema = srcCanvas.exportSchematic(xSrc, ySrc, zSrc, 
@@ -133,7 +131,7 @@ public class Exporter
                 else
                     continue;
                         
-                cb = EntityFactory.createCommandBlock(xc, yc, zc, cmd);
+                cb = EntityFactory.getDefaultFactory().createCommandBlock(xc, yc, zc, cmd);
                 schema.removeTileEntity(e);
                 schema.addTileEntity(cb);
             }

@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import rakama.worldtools.data.Chunk;
+import rakama.worldtools.data.entity.EntityFactory;
 import rakama.worldtools.light.ChunkRelighter;
 import rakama.worldtools.util.PriorityCache;
 
@@ -373,6 +374,11 @@ public class ChunkManager
         return mask;
     }
 
+    public EntityFactory getEntityFactory()
+    {
+        return access.getEntityFactory();
+    }
+        
     public Collection<RegionInfo> getRegions()
     {
         return access.getRegions();

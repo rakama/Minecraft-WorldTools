@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 
 import rakama.worldtools.WorldManager;
-import rakama.worldtools.WorldTools;
 import rakama.worldtools.canvas.BlockCanvas;
 import rakama.worldtools.data.Block;
 
@@ -31,12 +30,12 @@ public class Mandelbrot
     
     public static void main(String[] args) throws IOException
     {
-        WorldManager manager = WorldTools.getWorldManager(new File(directory));
+        WorldManager manager = WorldManager.getWorldManager(new File(directory));
         BlockCanvas canvas = manager.getCanvas();
         renderMandelbrot(canvas, 512, 128, 4);
         manager.closeAll();
     }
-    
+        
     public static void renderMandelbrot(BlockCanvas canvas, int size, int maxY, int samples)
     {
         int xStart = -size / 2;

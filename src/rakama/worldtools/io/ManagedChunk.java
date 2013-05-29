@@ -246,15 +246,18 @@ class ManagedChunk extends Chunk
         
         ManagedChunk chunk;
         chunk = new ManagedChunk(xPos.data, zPos.data, heightmap.data, biome.data, manager);
-        // TODO: create ManagedSection to catch Section changes
+        // TODO: create ManagedSection to catch Section changes?
+        // TODO: alternatively, hide sections from interface
         chunk.loadSections(sections);
 
+        EntityFactory factory = manager.getEntityFactory();
+        
         Tag tagEntities = level.get("Entities");   
         if(tagEntities != null)
         {
             ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;            
             for(int i=0; i<list.size(); i++)
-                chunk.entities.add(EntityFactory.getEntity(list.get(i)));
+                chunk.entities.add(factory.createEntity(list.get(i)));
         }
         
         Tag tagTileEntities = level.get("TileEntities");
@@ -262,7 +265,7 @@ class ManagedChunk extends Chunk
         {
             ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;            
             for(int i=0; i<list.size(); i++)
-                chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+                chunk.tileEntities.add(factory.createTileEntity(list.get(i)));
         }
         
         chunk.tag = tag;

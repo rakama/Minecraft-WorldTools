@@ -25,7 +25,6 @@ import rakama.worldtools.io.ChunkAccess;
 import rakama.worldtools.io.ChunkManager;
 import rakama.worldtools.light.WorldRelighter;
 
-
 public class WorldManager
 {    
     protected File regionDirectory, rootDirectory;
@@ -33,6 +32,21 @@ public class WorldManager
     protected ChunkManager manager;
     protected WorldCanvas canvas;
 
+    /**
+     * Creates a WorldManager instance, where rootDirectory points to the 
+     * location of a Minecraft world's "level.dat" file.
+     * 
+     * @param rootDirectory directory location for a "level.dat" file
+     * @return a WorldTools instance for the specified world
+     * @throws IOException
+     */
+    public static WorldManager getWorldManager(File rootDirectory) throws IOException
+    {
+        WorldManager manager = new WorldManager();
+        manager.setDirectory(rootDirectory);
+        return manager;
+    }
+    
     protected WorldManager()
     {
     }

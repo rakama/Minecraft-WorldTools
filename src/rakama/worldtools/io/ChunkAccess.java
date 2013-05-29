@@ -26,9 +26,9 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import rakama.worldtools.data.Chunk;
-
 import net.minecraft.world.level.chunk.storage.RegionFile;
+import rakama.worldtools.data.Chunk;
+import rakama.worldtools.data.entity.EntityFactory;
 
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.NbtIo;
@@ -39,10 +39,12 @@ public class ChunkAccess
     
     private File regionDirectory;
     private RegionManager regionManager;
+    private EntityFactory entityFactory;
 
     protected ChunkAccess()
     {
         regionManager = new RegionManager();
+        entityFactory = EntityFactory.getDefaultFactory();
     }
 
     public static ChunkAccess createInstance(File directory) throws IOException
@@ -198,6 +200,11 @@ public class ChunkAccess
         String path = regionDirectory.getCanonicalPath() + "/r." + x + "." + z + ".mca";        
         regionManager.addFile(new File(path), x, z);
         return regionManager.getRegionFile(x, z);
+    }
+    
+    public EntityFactory getEntityFactory()
+    {
+        return entityFactory;
     }
     
     public Collection<RegionInfo> getRegions()

@@ -419,9 +419,14 @@ public class Chunk
             section.skylight.fill(0);
         }
     }
+
+    public static Chunk loadChunk(CompoundTag tag)
+    {
+        return loadChunk(tag, EntityFactory.getDefaultFactory());
+    }
     
     @SuppressWarnings("unchecked")
-    public static Chunk loadChunk(CompoundTag tag)
+    public static Chunk loadChunk(CompoundTag tag, EntityFactory factory)
     {
         CompoundTag level = (CompoundTag) tag.get("Level");
 
@@ -439,7 +444,7 @@ public class Chunk
         {
             ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;            
             for(int i=0; i<list.size(); i++)
-                chunk.entities.add(EntityFactory.getEntity(list.get(i)));
+                chunk.entities.add(factory.createEntity(list.get(i)));
         }
         
         Tag tagTileEntities = level.get("TileEntities");
@@ -447,7 +452,7 @@ public class Chunk
         {
             ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;            
             for(int i=0; i<list.size(); i++)
-                chunk.tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+                chunk.tileEntities.add(factory.createTileEntity(list.get(i)));
         }
 
         chunk.tag = tag;

@@ -31,9 +31,21 @@ import com.mojang.nbt.Tag;
 
 public class EntityFactory
 { 
-    // TODO: manage entities so read/write is handled properly
+    protected static EntityFactory default_factory;
     
-    public static Entity getEntity(CompoundTag tag)
+    // TODO: manage entities so read/write is handled properly
+    // TODO: add "related block id" to tile entity so when tile
+    // entities are added via the canvas, it automatically places the block
+    
+    public static EntityFactory getDefaultFactory()
+    {
+        if(default_factory == null)
+            default_factory = new EntityFactory();
+        
+        return default_factory;
+    }
+    
+    public Entity createEntity(CompoundTag tag)
     {
         Tag temp = tag.get("id");
         
@@ -47,7 +59,7 @@ public class EntityFactory
         return new EntityImpl(tag);
     }
 
-    public static TileEntity getTileEntity(CompoundTag tag)
+    public TileEntity createTileEntity(CompoundTag tag)
     {
         Tag temp = tag.get("id");
         
@@ -55,8 +67,9 @@ public class EntityFactory
             throw new IllegalArgumentException("Unrecognized tag format");
         
         StringTag id = (StringTag)temp;
+
+        // TODO: map into correct classes
         
-        // TODO: allow user to register these
         if(id.data.equals("Control"))
             return new CommandBlock(tag);
         else if(id.data.equals("Sign"))
@@ -64,8 +77,8 @@ public class EntityFactory
         else
             return new TileEntityImpl(tag);
     }
-
-    public static EntityImpl createXPOrb(int x, int y, int z, int value)
+    
+    public EntityImpl createXPOrb(int x, int y, int z, int value)
     {
         CompoundTag root = createEntityRoot(x, y, z, "XPOrb");
         root.put("Health", new ShortTag("Health", (short)5));
@@ -74,7 +87,7 @@ public class EntityFactory
         return new EntityImpl(root);
     }
     
-    public static Entity createFallingBlock(int x, int y, int z, int id, int data)
+    public Entity createFallingBlock(int x, int y, int z, int id, int data)
     {
         CompoundTag root = createEntityRoot(x, y, z, "FallingSand");
         root.put("Tile", new ByteTag("Tile", (byte)id));
@@ -87,7 +100,7 @@ public class EntityFactory
         return new EntityImpl(root);
     }
 
-    public static TileEntity createHiddenBlock(int x, int y, int z, int id, int data, float delay)
+    public TileEntity createHiddenBlock(int x, int y, int z, int id, int data, float delay)
     {
         CompoundTag root = createTileRoot(x, y, z, "Piston");
         root.put("blockId", new IntTag("blockId", id));
@@ -98,14 +111,14 @@ public class EntityFactory
         return new TileEntityImpl(root);
     }
     
-    public static CommandBlock createCommandBlock(int x, int y, int z, String command)
+    public CommandBlock createCommandBlock(int x, int y, int z, String command)
     {
         CompoundTag root = createTileRoot(x, y, z, "Control");
         root.put("Command", new StringTag("Command", command));
         return new CommandBlock(root);
     }
     
-    protected static CompoundTag createTileRoot(int x, int y, int z, String id)
+    protected CompoundTag createTileRoot(int x, int y, int z, String id)
     {
         CompoundTag root = new CompoundTag();
         root.put("x", new IntTag("x", x));
@@ -115,7 +128,7 @@ public class EntityFactory
         return root;
     }
 
-    protected static CompoundTag createEntityRoot(int x, int y, int z, String id)
+    protected CompoundTag createEntityRoot(int x, int y, int z, String id)
     {
         CompoundTag root = new CompoundTag();
         
