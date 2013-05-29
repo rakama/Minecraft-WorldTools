@@ -37,7 +37,7 @@ public class WorldManager
      * location of a Minecraft world's "level.dat" file.
      * 
      * @param rootDirectory directory location for a "level.dat" file
-     * @return a WorldTools instance for the specified world
+     * @return a WorldManager instance for the specified world
      * @throws IOException
      */
     public static WorldManager getWorldManager(File rootDirectory) throws IOException

@@ -26,7 +26,6 @@ import java.util.List;
 
 import rakama.worldtools.data.Block;
 
-
 public class ColorProfile
 {
     protected static String default_file = "csv/colors.csv";   

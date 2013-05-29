@@ -6,12 +6,6 @@
 22,153683,Lazuli
 24,aea881,Sandstone
 35,ffffff,WhiteWool
-35:10,612f8b,PurpleWool
-35:11,2a338a,BlueWool
-35:12,3e2718,BrownWool
-35:13,355f22,GreenWool
-35:14,f02c2d,RedWool
-35:15,120f11,BlackWool
 35:1,e77e36,OrangeWool
 35:2,bd4bc7,MagentaWool
 35:3,4a5e85,LBlueWool
@@ -21,6 +15,12 @@
 35:7,414141,GrayWool
 35:8,9da4a4,LGrayWool
 35:9,2e6d87,CyanWool
+35:10,612f8b,PurpleWool
+35:11,2a338a,BlueWool
+35:12,3e2718,BrownWool
+35:13,355f22,GreenWool
+35:14,f02c2d,RedWool
+35:15,120f11,BlackWool
 3,6d4e36,Dirt
 41,dbd642,GoldBlock
 45,71483c,Bricks
