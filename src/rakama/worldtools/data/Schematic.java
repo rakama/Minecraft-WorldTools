@@ -63,7 +63,7 @@ public class Schematic implements BlockCanvas
     }
 
     @SuppressWarnings("unchecked")
-    protected Schematic(CompoundTag tag)
+    protected Schematic(CompoundTag tag, EntityFactory factory)
     {
         this.tag = tag;
         this.width = ((ShortTag)tag.get("Width")).data;
@@ -80,7 +80,7 @@ public class Schematic implements BlockCanvas
         {
             ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;            
             for(int i=0; i<list.size(); i++)
-                entities.add(EntityFactory.getEntity(list.get(i)));
+                entities.add(factory.createEntity(list.get(i)));
         }
         
         Tag tagTileEntities = tag.get("TileEntities");
@@ -88,7 +88,7 @@ public class Schematic implements BlockCanvas
         {
             ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagTileEntities;            
             for(int i=0; i<list.size(); i++)
-                tileEntities.add(EntityFactory.getTileEntity(list.get(i)));
+                tileEntities.add(factory.createTileEntity(list.get(i)));
         }
     }
     
@@ -159,36 +159,6 @@ public class Schematic implements BlockCanvas
         int index = toIndex(x, y, z);
         return metadata[index] & 0xFF;
     }
-
-    public int getBlockLight(int x, int y, int z)
-    {
-        return -1;
-    }
-
-    public int getSkyLight(int x, int y, int z)
-    {
-        return -1;
-    }
-    
-    public void setBiome(int x, int z, int biome)
-    {
-        throw new UnsupportedOperationException();
-    }
-    
-    public void setBiome(int x, int z, Biome biome)
-    {
-        throw new UnsupportedOperationException();
-    }
-    
-    public int getBiome(int x, int z)
-    {
-        throw new UnsupportedOperationException();
-    }
-    
-    public int getHeight(int x, int z)
-    {
-        throw new UnsupportedOperationException();
-    }    
 
     public List<Entity> getEntities()
     {
@@ -314,12 +284,17 @@ public class Schematic implements BlockCanvas
     {
         return x + (z * width) + (y * length * width);
     }
-
+    
     public static Schematic loadSchematic(CompoundTag tag) throws IOException
+    {        
+        return loadSchematic(tag, EntityFactory.getDefaultFactory());
+    }
+    
+    public static Schematic loadSchematic(CompoundTag tag, EntityFactory factory) throws IOException
     {        
         try
         {
-            return new Schematic(tag);
+            return new Schematic(tag, factory);
         }
         catch(Exception e)
         {

@@ -18,12 +18,10 @@ package rakama.worldtools.canvas;
 
 import java.util.List;
 
-import rakama.worldtools.data.Biome;
 import rakama.worldtools.data.Block;
 import rakama.worldtools.data.Entity;
 import rakama.worldtools.data.Schematic;
 import rakama.worldtools.data.TileEntity;
-
 
 public interface BlockCanvas
 {    
@@ -33,13 +31,7 @@ public interface BlockCanvas
     public void setMetaData(int x, int y, int z, int data);    
     public Block getBlock(int x, int y, int z);    
     public int getBlockID(int x, int y, int z);
-    public int getMetaData(int x, int y, int z);    
-    public int getBlockLight(int x, int y, int z);
-    public int getSkyLight(int x, int y, int z);
-    public void setBiome(int x, int z, int biome);
-    public void setBiome(int x, int z, Biome biome);    
-    public int getBiome(int x, int z);
-    public int getHeight(int x, int z);
+    public int getMetaData(int x, int y, int z);
 
     public List<Entity> getEntities(int x0, int y0, int z0, int x1, int y1, int z1);
     public List<TileEntity> getTileEntities(int x0, int y0, int z0, int x1, int y1, int z1);

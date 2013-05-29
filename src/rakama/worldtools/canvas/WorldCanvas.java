@@ -111,6 +111,16 @@ public class WorldCanvas implements BlockCanvas
             return chunk.getSkyLight(x & 0xF, y, z & 0xF);
     }
 
+    public int getSkyLightHeight(int x, int z)
+    {
+        Chunk chunk = manager.getChunk(x >> 4, z >> 4);
+
+        if(chunk == null)
+            return -1;
+        else
+            return chunk.getHeight(x & 0xF, z & 0xF);
+    }
+    
     public void setBiome(int x, int z, int biome)
     {
         Chunk chunk = manager.getChunk(x >> 4, z >> 4, true);
@@ -131,16 +141,6 @@ public class WorldCanvas implements BlockCanvas
             return -1;
         else
             return chunk.getBiome(x & 0xF, z & 0xF);
-    }
-
-    public int getHeight(int x, int z)
-    {
-        Chunk chunk = manager.getChunk(x >> 4, z >> 4);
-
-        if(chunk == null)
-            return -1;
-        else
-            return chunk.getHeight(x & 0xF, z & 0xF);
     }
     
     public List<Entity> getEntities(int x0, int y0, int z0, int x1, int y1, int z1)
