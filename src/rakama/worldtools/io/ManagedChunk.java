@@ -93,19 +93,22 @@ class ManagedChunk extends Chunk
     
     public void invalidateBlocks()
     {
-        this.needsWrite = true;
+        invalidateFile();        
         this.needsRelight = true;
         this.needsNeighborNotify = true;
     }
 
     public void invalidateLights()
     {
-        this.needsWrite = true;
+        invalidateFile();
         this.needsRelight = true;
     }
     
     public void invalidateFile()
     {
+        if(manager.isReadOnly())
+            throw new IllegalStateException("Cannot modify chunk data (read only)");
+        
         this.needsWrite = true;
     }
     

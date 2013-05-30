@@ -33,15 +33,12 @@ import rakama.worldtools.data.entity.CommandBlock;
 import rakama.worldtools.data.entity.EntityFactory;
 
 public class Exporter
-{
+{      
+    static boolean copy_biomes = true;
+
     public static void main(String[] args) throws IOException
     {
-        List<String> list = new ArrayList<String>(Arrays.asList(args));
-        
-        boolean copyBiomes = false;
-        if(list.remove("-b"))
-            copyBiomes = true;
-
+        List<String> list = new ArrayList<String>(Arrays.asList(args));  
         if(list.size() < 11)
         {
             System.err.println("Error: Incorrect number of arguments.");
@@ -82,8 +79,15 @@ public class Exporter
         if(height < 0){ySrc += height; height = -height;}
         if(length < 0){zSrc += length; length = -length;}
 
-        WorldManager srcManager = WorldManager.getWorldManager(new File(src));
+        File srcFile = new File(src);
+        File destFile = new File(dest);
+                
         WorldManager destManager = WorldManager.getWorldManager(new File(dest));
+        WorldManager srcManager = destManager;
+        
+        if(!srcFile.equals(destFile))
+            srcManager = WorldManager.getWorldManager(new File(src), true);
+
         WorldCanvas srcCanvas = srcManager.getCanvas();
         WorldCanvas destCanvas = destManager.getCanvas();
         
@@ -138,15 +142,13 @@ public class Exporter
         }
         
         // remove existing entities from target region
-        List<Entity> removeEntities = destCanvas.getEntities(
-                xDest, yDest, zDest,
+        List<Entity> removeEntities = destCanvas.getEntities(xDest, yDest, zDest,
                 xDest+width-1, yDest+height-1, zDest+length-1);
         for(Entity e : new ArrayList<Entity>(removeEntities))
             destCanvas.removeEntity(e);
 
         // remove existing tile entities from target region
-        List<TileEntity> removeTiles = destCanvas.getTileEntities(
-                xDest, yDest, zDest,
+        List<TileEntity> removeTiles = destCanvas.getTileEntities(xDest, yDest, zDest,
                 xDest+width-1, yDest+height-1, zDest+length-1);
         for(TileEntity e : new ArrayList<TileEntity>(removeTiles))
             destCanvas.removeTileEntity(e);
@@ -155,7 +157,7 @@ public class Exporter
         destCanvas.importSchematic(xDest, yDest, zDest, schema);
         
         // copy biomes from source to destination
-        if(copyBiomes)
+        if(copy_biomes)
         {
             for(int z=zSrc; z<zSrc+length; z++)
             {
@@ -164,6 +166,7 @@ public class Exporter
                     int biome = srcCanvas.getBiome(x, z);
                     if(biome < 0)
                         biome = 0;
+                    
                     destCanvas.setBiome(x - dx, z - dz, biome);
                 }
             }

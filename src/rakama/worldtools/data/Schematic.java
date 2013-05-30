@@ -75,10 +75,10 @@ public class Schematic implements BlockCanvas
         this.entities = new ArrayList<Entity>();
         this.tileEntities = new ArrayList<TileEntity>();
         
-        Tag tagEntities = tag.get("Entities");        
+        Tag tagEntities = tag.get("Entities");
         if(tagEntities != null)
         {
-            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;            
+            ListTag<CompoundTag> list = (ListTag<CompoundTag>)tagEntities;
             for(int i=0; i<list.size(); i++)
                 entities.add(factory.createEntity(list.get(i)));
         }

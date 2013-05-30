@@ -30,7 +30,8 @@ public class WorldManager
     protected File regionDirectory, rootDirectory;
     protected ChunkAccess access;
     protected ChunkManager manager;
-    protected WorldCanvas canvas;
+    protected WorldCanvas canvas;    
+    protected boolean readOnly;
 
     /**
      * Creates a WorldManager instance, where rootDirectory points to the 
@@ -42,13 +43,21 @@ public class WorldManager
      */
     public static WorldManager getWorldManager(File rootDirectory) throws IOException
     {
-        WorldManager manager = new WorldManager();
+        WorldManager manager = new WorldManager(false);
+        manager.setDirectory(rootDirectory);
+        return manager;
+    }
+
+    public static WorldManager getWorldManager(File rootDirectory, boolean readOnly) throws IOException
+    {
+        WorldManager manager = new WorldManager(readOnly);
         manager.setDirectory(rootDirectory);
         return manager;
     }
     
-    protected WorldManager()
+    protected WorldManager(boolean readOnly)
     {
+        this.readOnly = readOnly;
     }
     
     protected void setDirectory(File directory) throws IOException
@@ -56,7 +65,7 @@ public class WorldManager
         rootDirectory = findRootDirectory(directory);
         regionDirectory = findRegionDirectory(directory);
         access = ChunkAccess.createInstance(regionDirectory);
-        manager = new ChunkManager(access);
+        manager = new ChunkManager(access, readOnly);
         canvas = new WorldCanvas(manager);
     }
     
@@ -112,6 +121,9 @@ public class WorldManager
     
     public void relightAll()
     {
+        if(manager.isReadOnly())
+            throw new IllegalStateException("Cannot modify chunk data (read only)");
+        
         manager.closeAll();
         WorldRelighter.relightWorld(access, true);
     }

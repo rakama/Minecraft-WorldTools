@@ -36,6 +36,7 @@ import com.mojang.nbt.NbtIo;
 public class ChunkAccess
 {
     protected final boolean debug = false;
+    protected final boolean write_empty_chunks = false;
     
     private File regionDirectory;
     private RegionManager regionManager;
@@ -161,6 +162,10 @@ public class ChunkAccess
     {
         if(debug)
             log("WRITE_CHUNK " + chunk.getX() + " " + chunk.getZ());
+        
+        if(!write_empty_chunks && chunk.isEmpty() 
+        && getDataInputStream(chunk.getX(), chunk.getZ()) == null)
+            return;
         
         DataOutputStream dos = getDataOutputStream(chunk.getX(), chunk.getZ());
 

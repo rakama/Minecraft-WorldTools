@@ -142,7 +142,7 @@ public class EntityFactory
 
         ListTag<DoubleTag> motion = new ListTag<DoubleTag>("Motion");
         motion.add(new DoubleTag("dX", 0));
-        motion.add(new DoubleTag("dY", -100));
+        motion.add(new DoubleTag("dY", 0));
         motion.add(new DoubleTag("dZ", 0));
         root.put("Motion", motion);
 

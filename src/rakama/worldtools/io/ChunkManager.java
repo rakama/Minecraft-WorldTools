@@ -48,15 +48,25 @@ public class ChunkManager
     
     private final int windowSize, windowScale, windowMask;
     private int windowMinX, windowMinZ, reads, writes;
-    private boolean lightingEnabled;
+    private boolean lightingEnabled, readOnly;
     private Thread shutdownHook;
     
     public ChunkManager(ChunkAccess access)
     {
-        this(access, default_window_scale, default_max_cache_size);
+        this(access, false, true);
+    }
+
+    public ChunkManager(ChunkAccess access, boolean readOnly)
+    {
+        this(access, readOnly, readOnly, default_window_scale, default_max_cache_size);
+    }
+    
+    public ChunkManager(ChunkAccess access, boolean readOnly, boolean lightingEnabled)
+    {
+        this(access, readOnly, lightingEnabled, default_window_scale, default_max_cache_size);
     }
         
-    protected ChunkManager(ChunkAccess access, int windowScale, int cacheSize)
+    protected ChunkManager(ChunkAccess access, boolean ro, boolean le, int windowScale, int cacheSize)
     {
         this.access = access;
         this.windowScale = windowScale;
@@ -72,12 +82,12 @@ public class ChunkManager
         Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
 
-    public void setLightingEnabled(boolean enabled)
+    public boolean isReadOnly()
     {
-        lightingEnabled = enabled;
+        return readOnly;
     }
     
-    public boolean getLightingEnabled()
+    public boolean isLightingEnabled()
     {
         return lightingEnabled;
     }
@@ -97,7 +107,7 @@ public class ChunkManager
     public Chunk getChunk(int x, int z, boolean create, boolean relight)
     {
         ManagedChunk chunk = getChunk(x, z, priority_access, true, create);        
-        if(chunk != null && chunk.needsRelight() && lightingEnabled)
+        if(chunk != null && lightingEnabled && chunk.needsRelight())
             relightChunk(chunk); 
         doCleanup(minimum_cleanup_size);
         return chunk;
@@ -151,7 +161,7 @@ public class ChunkManager
         
         if(chunk == null)
         {    
-            if(!create)
+            if(!create || readOnly)
                 return null;     
             
             if(debug)
@@ -249,6 +259,9 @@ public class ChunkManager
         if(debug)
             log("FLUSH_CHANGES " + chunk.getX() + " " + chunk.getZ());
     
+        if(readOnly)
+            return false;
+        
         boolean pendingChanges = false;
 
         if(chunk.needsNeighborNotify())
@@ -257,7 +270,7 @@ public class ChunkManager
             pendingChanges = true;
         }
         
-        if(chunk.needsRelight() && lightingEnabled)
+        if(lightingEnabled && chunk.needsRelight())
             relightChunk(chunk);
         
         if(chunk.needsWrite())
