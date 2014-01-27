@@ -64,7 +64,7 @@ public class WorldManager
     {
         rootDirectory = findRootDirectory(directory);
         regionDirectory = findRegionDirectory(directory);
-        access = ChunkAccess.createInstance(regionDirectory);
+        access = ChunkAccess.createInstance(directory);
         manager = new ChunkManager(access, readOnly);
         canvas = new WorldCanvas(manager);
     }
@@ -81,7 +81,11 @@ public class WorldManager
         // check for level.dat, to see if we're in the map directory
         File level = new File(directory.getCanonicalPath() + "/level.dat");
         if(!level.exists())
-            throw new FileNotFoundException(directory.getCanonicalPath());
+        {
+            level = new File(directory.getCanonicalPath() + "/level.dat_new");
+            if(!level.exists())
+                throw new FileNotFoundException(directory.getCanonicalPath());
+        }
 
         return directory;
     }

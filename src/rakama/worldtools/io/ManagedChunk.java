@@ -17,6 +17,7 @@
 package rakama.worldtools.io;
 
 import rakama.worldtools.coord.Coordinate2D;
+import rakama.worldtools.data.Biome;
 import rakama.worldtools.data.Block;
 import rakama.worldtools.data.Chunk;
 import rakama.worldtools.data.Entity;
@@ -30,7 +31,7 @@ import com.mojang.nbt.IntTag;
 import com.mojang.nbt.ListTag;
 import com.mojang.nbt.Tag;
 
-class ManagedChunk extends Chunk
+public class ManagedChunk extends Chunk
 {
     private ChunkManager manager;
     private ChunkID id;
@@ -111,6 +112,12 @@ class ManagedChunk extends Chunk
         
         this.needsWrite = true;
     }
+
+    @Override
+    public void setPosition(int x, int z)
+    {
+        throw new UnsupportedOperationException();
+    }
     
     @Override
     public void setHeight(int x, int z, int val)
@@ -124,6 +131,13 @@ class ManagedChunk extends Chunk
     {
         invalidateFile();
         super.setBiome(x, z, val);
+    }
+
+    @Override
+    public void setBiome(int x, int z, Biome biome)
+    {
+        invalidateFile();
+        super.setBiome(x, z, biome);
     }
 
     @Override
@@ -202,26 +216,14 @@ class ManagedChunk extends Chunk
         invalidateFile();
         return super.removeTileEntity(e);
     }
-
-    protected void setChunkCoordinate(int x, int z)
+    
+    protected void fixPosition(int x, int z)
     {
         if(this.x == x && this.z == z)
             return;
         
-        this.x = x;
-        this.z = z;
         this.id = new ChunkID(x, z);
-        
-        if(this.tag != null)
-        {
-            CompoundTag level = this.tag.getCompound("Level");
-            
-            if(level != null)
-            {
-                level.put("xPos", new IntTag("xPos", x));
-                level.put("zPos", new IntTag("zPos", z));
-            }
-        }
+        super.setPosition(x, z);
     }
 
     protected ChunkID getID()

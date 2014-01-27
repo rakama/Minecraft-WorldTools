@@ -28,7 +28,7 @@ public final class Block implements Comparable<Block>
 
     static
     {
-        initializeMaterials(Block.class.getResource(default_materials_file));
+        loadMaterials(Block.class.getResource(default_materials_file));
     }
     
     public final static Block AIR = getBlock(0);
@@ -70,7 +70,7 @@ public final class Block implements Comparable<Block>
         this.luminance = lum;
     }
     
-    protected static void initializeMaterials(URL url)
+    public static void loadMaterials(URL url)
     {
         try
         {      

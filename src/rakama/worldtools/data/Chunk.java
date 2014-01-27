@@ -83,6 +83,26 @@ public class Chunk
     {
         return z;
     }
+
+    public void setPosition(int x, int z)
+    {
+        if(this.x == x && this.z == z)
+            return;
+        
+        this.x = x;
+        this.z = z;
+        
+        if(this.tag != null)
+        {
+            CompoundTag level = this.tag.getCompound("Level");
+            
+            if(level != null)
+            {
+                level.put("xPos", new IntTag("xPos", x));
+                level.put("zPos", new IntTag("zPos", z));
+            }
+        }
+    }
     
     public void setHeight(int x, int z, int val)
     {

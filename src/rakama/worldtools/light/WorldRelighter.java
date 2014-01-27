@@ -65,7 +65,7 @@ public class WorldRelighter
 
         // relight each region
         while(regionIterator.hasNext())
-        {
+        {            
             RegionInfo current = regionIterator.next();
             Coordinate2D coord = current.getRegionCoordinate();
             

@@ -99,13 +99,19 @@ public class Exporter
         int dy = ySrc - yDest;
         int dz = zSrc - zDest;
 
-        // create regular expression for tp commands
+        // regular expression for tp commands
         String space = "\\s+?"; 
         String target = "(@[prafPRAF](?:\\[.*\\])*?)";
-        String number = "(-?[\\p{Digit}]+?)";
+        String number = "(~?-?[\\p{Digit}]+?)";
         String tpstr = "/tp" + space + target + space + number 
-                        + space + number + space + number + "\\s*?";        
-        Pattern pattern = Pattern.compile(tpstr);
+                        + space + number + space + number + "\\s*?";
+
+        // regular expression for general commands
+        String argstr = "/([^\\s]*)" + space + "(.*)";
+        String argsplit = "(@[prafPRAF])(\\[.*\\])*?)";
+        
+        Pattern apattern = Pattern.compile(argstr);
+        Pattern tpattern = Pattern.compile(tpstr);
 
         // edit command block teleport coordinates    
         List<TileEntity> tileEntities = schema.getTileEntities();
@@ -121,16 +127,35 @@ public class Exporter
                 
                 if(cmd == null)
                     continue;                
+
+                Matcher tmatcher = tpattern.matcher(cmd);
                 
-                Matcher matcher = pattern.matcher(cmd);
-                
-                if(matcher.matches())
+                if(tmatcher.matches())
                 {
-                    String tar = matcher.group(1);
-                    int xt = Integer.parseInt(matcher.group(2)) - dx;
-                    int yt = Integer.parseInt(matcher.group(3)) - dy;
-                    int zt = Integer.parseInt(matcher.group(4)) - dz;
+                    String tar = tmatcher.group(1);
+                    String xstr = tmatcher.group(2);
+                    String ystr = tmatcher.group(3);
+                    String zstr = tmatcher.group(4);
+                                        
+                    int xt = Integer.parseInt(xstr.replace("~", "")) - dx;
+                    int yt = Integer.parseInt(ystr.replace("~", "")) - dy;
+                    int zt = Integer.parseInt(zstr.replace("~", "")) - dz;
+                    
+                    xstr = xstr.startsWith("~") ? xstr : Integer.toString(xt);
+                    ystr = ystr.startsWith("~") ? ystr : Integer.toString(yt);
+                    zstr = zstr.startsWith("~") ? zstr : Integer.toString(zt);         
+                        
                     cmd = "/tp " + tar + " " + xt + " " + yt + " " + zt;
+                }
+                
+                Matcher amatcher = apattern.matcher(cmd);
+                
+                if(amatcher.matches())
+                {
+                    String arg = tmatcher.group(1);
+                    String val = tmatcher.group(2);
+                    
+                    // TODO: split val into tokens, fix the xyz ones
                 }
                 else
                     continue;

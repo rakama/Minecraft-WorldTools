@@ -68,7 +68,7 @@ class LightCache
         mode = Mode.SKYLIGHT;
     }
 
-    public void setChunk(int x16, int z16, Chunk chunk) // TODO: immutable
+    public void setChunk(int x16, int z16, Chunk chunk)
     {
         int cindex = toChunkIndex(x16, z16);
         chunks[cindex] = chunk;
@@ -216,7 +216,7 @@ class LightCache
         if(chunks[cindex] == null)
             return;
 
-        int maxY = countBottomSections(chunks[cindex]) << 4;
+        int maxY = (countBottomSections(chunks[cindex]) << 4);
 
         for(int y0 = y; y0 < maxY; y0++)
             setLight(x, y0, z, (byte) 15);

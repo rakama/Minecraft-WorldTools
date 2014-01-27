@@ -67,15 +67,12 @@ public class ChunkAccess
         if(directory.isFile())
            directory = directory.getParentFile();
 
-        // check for level.dat, to see if we're in the map directory
-        File level = new File(directory.getCanonicalPath() + "/level.dat");
-        if(level.exists())
-        {
-            // try switching to the /region directory
-            File newDirectory = new File(directory.getCanonicalPath() + "/region");
-            if(newDirectory.exists())
-                directory = newDirectory;
-        }
+        // switch to the /region directory
+        File newDirectory = new File(directory.getCanonicalPath() + "/region");
+        if(newDirectory.exists())
+            directory = newDirectory;
+        else
+            throw new FileNotFoundException(newDirectory.getCanonicalPath());
 
         this.regionDirectory = directory;
         
@@ -153,7 +150,7 @@ public class ChunkAccess
         dis.close();
         
         if(x != chunk.getX() || z != chunk.getZ())
-            chunk.setChunkCoordinate(x, z);
+            chunk.fixPosition(x, z);
         
         return chunk;
     }
